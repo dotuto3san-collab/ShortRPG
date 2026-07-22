@@ -11,8 +11,13 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI focusItemNameText;
     [SerializeField] private TextMeshProUGUI focusItemAmountText;
 
+    [SerializeField] private Image rankImage;
+    [SerializeField] private RarityIconDatabase rarityDB;
+
     public Transform content;
     public GameObject itemRowPrefab;
+
+    private int lastSelectedIndex = 0;
 
     // Update is called once per frame
     void Update()
@@ -54,7 +59,20 @@ public class InventoryUI : MonoBehaviour
         }
         if(focusItemAmountText != null)
         {
-            focusItemAmountText.text = item.amount.ToString();
+            int displayAmount = ItemDisplayHelper.GetDisplayAmount(item);
+            bool isEquipped = ItemDisplayHelper.IsEquipped(item);
+
+            focusItemAmountText.text = displayAmount.ToString();
+
+            Color color = isEquipped ? new Color(0f, 0.4f, 1f) : Color.black;
+            
+            focusItemNameText.color = color;
+            focusItemAmountText.color = color;
+        }
+
+        if (rankImage != null && rarityDB != null)
+        {
+            rankImage.sprite = rarityDB.GetIcon(item.itemData.rarity);
         }
     }
 
@@ -159,6 +177,7 @@ public class InventoryUI : MonoBehaviour
 
             ItemRowUI rowUI = row.GetComponent<ItemRowUI>();
             rowUI.Setup(item);
+            rowUI.SetOnSubmitAction(OnItemSelected);
         }
 
         if (gameObject.activeInHierarchy)
@@ -170,6 +189,124 @@ public class InventoryUI : MonoBehaviour
             Debug.Log("InventoryUI is inactive. Coroutine skipped.");
         }
         
+    }
+
+    private InventoryItem selectedItem;
+
+    void OnItemSelected(InventoryItem item)
+    {
+        if(item == null || item.itemData == null)
+        {
+            Debug.LogError("Item is null");
+            return;
+        }
+
+        selectedItem = item;
+
+        if(EventSystem.current != null)
+        {
+            var selected = EventSystem.current.currentSelectedGameObject;
+            if (selected != null && selected.transform.IsChildOf(content))
+            {
+                lastSelectedIndex = selected.transform.GetSiblingIndex();
+            }
+        }
+
+        if(ItemUseConfirmUI.Instance != null)
+        {
+            ItemUseConfirmUI.Instance.Show(item, OnConfirmUseItem);
+        }
+    }
+
+    void OnConfirmUseItem(bool isYes)
+    {
+        if (!isYes) return;
+
+        if(EventSystem.current != null)
+        {
+            var selected = EventSystem.current.currentSelectedGameObject;
+            if (selected != null && selected.transform.IsChildOf(content))
+            {
+                lastSelectedIndex = selected.transform.GetSiblingIndex();
+            }
+        }
+
+        if(EventSystem.current != null)
+        {
+            var selected = EventSystem.current.currentSelectedGameObject;
+            if(selected != null && selected.transform.IsChildOf(content))
+            {
+                lastSelectedIndex = selected.transform.GetSiblingIndex();
+            }
+        }
+
+        if(selectedItem == null || selectedItem.itemData == null)
+        {
+            Debug.LogError("SelectedItem is null");
+            return;
+        }
+
+        var itemData = selectedItem.itemData;
+
+        if(itemData.equipData != null
+            && itemData.equipData.equipType != EquipData.EquipType.None)
+        {
+            if(EquipmentManager.Instance == null)
+            {
+                Debug.LogError("EquipmentManager not found");
+                return;
+            }
+
+            var equipType = itemData.equipData.equipType;
+            var currentlyEquipped = EquipmentManager.Instance.GetEquipped(equipType);
+
+            if(currentlyEquipped == itemData)
+            {
+                EquipmentManager.Instance.Unequip(equipType);
+            }
+            else
+            {
+                EquipmentManager.Instance.Equip(itemData);
+            }
+
+            Refresh();
+
+            return;
+        }
+
+        if (!itemData.canUseInField)
+        {
+            Debug.Log("フィールドでは使えない");
+            return;
+        }
+
+        if(itemData.useEffect == null)
+        {
+            Debug.LogError("ItemEffect is null");
+            return;
+        }
+
+        StartCoroutine(UseItem(selectedItem));
+    }
+
+    IEnumerator UseItem(InventoryItem item)
+    {
+        var effect = item.itemData.useEffect;
+
+        yield return effect.Apply(null,null);
+
+        if(InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.RemoveItem(item.itemData, 1);
+        }
+
+        Refresh();
+
+        var statusUI = FindFirstObjectByType<MenuStatusUI>();
+        if(statusUI != null)
+        {
+            statusUI.UpdateHPDisplay();
+        }
     }
 
     IEnumerator SetupNavigationNextFrame(GameObject first)
@@ -199,11 +336,13 @@ public class InventoryUI : MonoBehaviour
 
             selectables[i].navigation = nav;
         }
-        if(first != null && EventSystem.current != null)
+        if(EventSystem.current != null && selectables.Count > 0)
         {
+            int index = Mathf.Clamp(lastSelectedIndex, 0, selectables.Count - 1);
+
             EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(first);
-            InputManager.Instance.IgnoreNextSubmit();
+            EventSystem.current.SetSelectedGameObject(selectables[index].gameObject);
+
             UpdateFocusedItemDisplay();
         }
     }

@@ -73,7 +73,7 @@ public class SaveManager : MonoBehaviour
             Debug.LogError("InventoryManager not found during Save");
         }
 
-            var player = FindFirstObjectByType<MainMove>();
+        MainMove player = GameManager.Instance.Player;
         if (player != null)
         {
             data.playerPosition = player.transform.position;
@@ -116,22 +116,13 @@ public class SaveManager : MonoBehaviour
         StartCoroutine(LoadAfterScene(data));
     }
 
-    private System.Collections.IEnumerator ApplyPlayerPositionNextFrame(Vector3 pos)
-    {
-        yield return null;
-
-        var player = FindFirstObjectByType<MainMove>();
-        if(player != null)
-        {
-            player.transform.position = pos;
-        }
-    }
-
     private System.Collections.IEnumerator LoadAfterScene(SaveData data)
     {
         yield return null;
 
-        GameManager.Instance.ChangeState(GameState.Exploring);
+        yield return new WaitUntil(() =>
+            GameManager.Instance != null &&
+            InventoryManager.Instance != null);
 
         GameManager.Instance.SetMoney(data.money);
         InventoryManager.Instance.LoadFromSaveData(data.items);
@@ -141,5 +132,7 @@ public class SaveManager : MonoBehaviour
         {
             player.transform.position = data.playerPosition;
         }
+
+        GameManager.Instance.ChangeState(GameState.Exploring);
     }
 }

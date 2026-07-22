@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e0ffd41674746648b029ba0063d4f7b, type: 3}
+  m_Name: Level Table
+  m_EditorClassIdentifier: 
+  levels:
+  - level: 1
+    requiredExp: 30
+    unlockMagics:
+    - {fileID: 11400000, guid: 85af3eb545bc47f4db6492da1b065b7f, type: 2}
+    - {fileID: 11400000, guid: f9ab73a6db968444aa0a32da32522df0, type: 2}
+    unlockSkills:
+    - {fileID: 11400000, guid: 80cf65137ba9b6842b3407f2736f3988, type: 2}
+    - {fileID: 11400000, guid: 1a7c1ed57c0880f49ae2db1f3b84c0fb, type: 2}
+    - {fileID: 11400000, guid: e460cd250a6480045b749ad8acbe74a1, type: 2}
+    - {fileID: 11400000, guid: 40067c88cd663a844a10be8b1458b0b1, type: 2}
+  - level: 2
+    requiredExp: 60
+    unlockMagics: []
+    unlockSkills:
+    - {fileID: 11400000, guid: bf9f498c9b8b0b6428248aad864d93b7, type: 2}
+  - level: 3
+    requiredExp: 90
+    unlockMagics: []
+    unlockSkills: []
+  - level: 4
+    requiredExp: 999
+    unlockMagics: []
+    unlockSkills: []

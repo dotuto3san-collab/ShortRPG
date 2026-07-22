@@ -4,9 +4,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewItem", menuName = "RPG/ItemData")]
 public class ItemData : ScriptableObject
 {
+    [Header("基本情報")]
     [SerializeField] public string itemId;
     // アイテムの名前を入力
     public string itemName;
+
     [TextArea]
     // 説明文を記入
     public string description;
@@ -18,15 +20,18 @@ public class ItemData : ScriptableObject
     public int buyPrice;
     // アイテムの売値を入力
     public int sellPrice;
-
-    [Header("売却設定")]
     public bool canSell = true;
-    
-    // アイテムのタイプを入力
-    public enum ItemType { Item, Weapon, Armor, Accessor, Magic}
+
+    [Header("使用可否")]
+    public bool canUseInBattle;
+    public bool canUseInField;
+
+    [Header("効果")]
+    public ItemEffect useEffect;
+    public EquipData equipData;
+
     [Header("種類とレアリティ")]
-    public ItemType type;
-    
+    public Rarity rarity;
     // レアリティの設定
     public enum Rarity
     {
@@ -41,5 +46,4 @@ public class ItemData : ScriptableObject
         LEGEND,
         Never
     }
-    public Rarity rarity;
 }

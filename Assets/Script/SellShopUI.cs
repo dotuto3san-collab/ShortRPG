@@ -24,10 +24,18 @@ public class SellShopUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI totalPriceText;
     [SerializeField] private TextMeshProUGUI afterMoneyText;
 
+    [SerializeField] private GameObject cannotSellTextRoot;
+    [SerializeField] private GameObject equippedLockTextRoot;
+
+    [SerializeField] private Image rankImage;
+    [SerializeField] private RarityIconDatabase rarityDB;
+
     private InventoryItem selectedItem;
 
     private int currentAmount = 1;
     private int maxAmount = 1;
+
+    private int lastSelectedIndex = 0;
 
     List<Selectable> selectableList = new List<Selectable>();
 
@@ -45,6 +53,9 @@ public class SellShopUI : MonoBehaviour
         if(priceUIRoot != null) priceUIRoot.SetActive(false);
         if(lockoverlay != null) lockoverlay.SetActive(false);
         if(sellButton != null) sellButton.SetActive(false);
+
+        if(cannotSellTextRoot != null) cannotSellTextRoot.SetActive(false);
+        if (equippedLockTextRoot != null) equippedLockTextRoot.SetActive(false);
     }
 
     void Update()
@@ -67,7 +78,6 @@ public class SellShopUI : MonoBehaviour
         lockoverlay.SetActive(false);
         sellButton.SetActive(false);
         selectedItem = null;
-        InputManager.Instance.IgnoreNextSubmit();
         Refresh();
     }
 
@@ -87,6 +97,7 @@ public class SellShopUI : MonoBehaviour
         {
             scrollRect.verticalNormalizedPosition = 1f;
         }
+
         foreach(Transform child in container)
         {
             Destroy(child.gameObject);
@@ -99,7 +110,18 @@ public class SellShopUI : MonoBehaviour
 
         foreach(var inv in items)
         {
-            if (inv.amount <= 0) continue;
+            bool isEquipped = false;
+
+            if(EquipmentManager.Instance != null && inv.itemData.equipData != null)
+            {
+                var equipped = EquipmentManager.Instance.GetEquipped(inv.itemData.equipData.equipType);
+                if (equipped == inv.itemData)
+                {
+                    isEquipped = true;
+                }
+            }
+
+            if (inv.amount <= 0 && !isEquipped) continue;
 
             var obj = Instantiate(itemSlotPrefab, container);
             var row = obj.GetComponent<ItemRowUI>();
@@ -120,7 +142,18 @@ public class SellShopUI : MonoBehaviour
             }
             selectableList.Add(selectable);
 
-            if (!inv.itemData.canSell)
+            if(EquipmentManager.Instance != null && inv.itemData.equipData != null)
+            {
+                var equipped = EquipmentManager.Instance.GetEquipped(inv.itemData.equipData.equipType);
+                if(equipped == inv.itemData)
+                {
+                    isEquipped = true;
+                }
+            }
+
+            bool cannotSell = !inv.itemData.canSell || (isEquipped && inv.amount -1 <= 0);
+
+            if (cannotSell)
             {
                 var canvasGroup = obj.GetComponent<CanvasGroup>();
                 if(canvasGroup == null)
@@ -136,16 +169,13 @@ public class SellShopUI : MonoBehaviour
             }
         }
         
-        if(first != null)
+        if(EventSystem.current != null && selectableList.Count > 0)
         {
-            if(EventSystem.current != null && first != null)
-            {
-                EventSystem.current.SetSelectedGameObject(null);
-                EventSystem.current.SetSelectedGameObject(first);
-                InputManager.Instance.IgnoreNextSubmit();
-                UpdateFocusedItemDisplay();
-            }
-            
+            int index = Mathf.Clamp(lastSelectedIndex, 0, selectableList.Count - 1);
+
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(selectableList[index].gameObject);
+            UpdateFocusedItemDisplay();
         }
 
         int  count = selectableList.Count;
@@ -176,6 +206,14 @@ public class SellShopUI : MonoBehaviour
 
     private void OnItemSelected(ItemData data)
     {
+        if(EventSystem.current != null)
+        {
+            var selected = EventSystem.current.currentSelectedGameObject;
+            if(selected != null && selected.transform.IsChildOf(container))
+            {
+                lastSelectedIndex = selected.transform.GetSiblingIndex();
+            }
+        }
         SelectItem(data);
     }
 
@@ -186,7 +224,18 @@ public class SellShopUI : MonoBehaviour
 
         if(inv == null) return;
 
-        if (!inv.itemData.canSell)
+        bool isEquippedZero = false;
+
+        if(EquipmentManager.Instance != null && inv.itemData.equipData != null)
+        {
+            var equipped = EquipmentManager.Instance.GetEquipped(inv.itemData.equipData.equipType);
+            if (equipped == inv.itemData && inv.amount <= 0)
+            {
+                isEquippedZero = true;
+            }
+        }
+
+        if (!inv.itemData.canSell || isEquippedZero)
         {
             Debug.Log("”„‹p•s‰ÂƒAƒCƒeƒ€‚Å‚·");
             return;
@@ -212,10 +261,27 @@ public class SellShopUI : MonoBehaviour
         if (item == null) return;
 
         focusItemNameText.text = item.itemData.itemName;
-        
-        if(focusItemPriceText != null)
+
+        bool isEquipped = false;
+
+        if(EquipmentManager.Instance != null && item.itemData.equipData != null)
         {
-            if (item.itemData.canSell)
+            var equipped = EquipmentManager.Instance.GetEquipped(item.itemData.equipData.equipType);
+            isEquipped = (equipped == item.itemData);
+        }
+
+        bool cannotSellByFlag = !item.itemData.canSell;
+        bool cannotSellByEquip = isEquipped && item.amount - 1 <= 0;
+
+        if(cannotSellTextRoot != null)
+            cannotSellTextRoot.SetActive(cannotSellByFlag);
+
+        if (equippedLockTextRoot != null)
+            equippedLockTextRoot.SetActive(!cannotSellByFlag && cannotSellByEquip);
+
+        if (focusItemPriceText != null)
+        {
+            if (!cannotSellByFlag && !cannotSellByEquip)
             {
                 focusItemPriceText.text = item.itemData.sellPrice.ToString();
             }
@@ -223,6 +289,11 @@ public class SellShopUI : MonoBehaviour
             {
                 focusItemPriceText.text = "-";
             }
+        }
+
+        if(rankImage != null && rarityDB != null)
+        {
+            rankImage.sprite = rarityDB.GetIcon(item.itemData.rarity);
         }
     }
 
@@ -276,7 +347,21 @@ public class SellShopUI : MonoBehaviour
 
     public void OpenConfirm()
     {
-        maxAmount = selectedItem.amount;
+        bool isEquipped = false;
+        if(EquipmentManager.Instance != null && selectedItem.itemData.equipData != null)
+        {
+            var equipped = EquipmentManager.Instance.GetEquipped(selectedItem.itemData.equipData.equipType);
+            isEquipped = (equipped == selectedItem.itemData);
+        }
+
+        maxAmount = isEquipped ? selectedItem.amount - 1 : selectedItem.amount;
+
+        if(maxAmount <= 0)
+        {
+            Debug.Log("”„‹p‚Å‚«‚é”‚ª‚ ‚è‚Ü‚¹‚ñ");
+            return;
+        }
+
         currentAmount = 1;
 
         confirmPanel.SetActive(true);
@@ -302,8 +387,6 @@ public class SellShopUI : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(sellButton);
             }
         }
-
-        InputManager.Instance.IgnoreNextSubmit();
 
         SetItemRowNavigation(false);
 
@@ -361,6 +444,19 @@ public class SellShopUI : MonoBehaviour
             return;
         }
 
+        bool isEquipped = false;
+        if(EquipmentManager.Instance != null && selectedItem.itemData.equipData != null)
+        {
+            var equipped = EquipmentManager.Instance.GetEquipped(selectedItem.itemData.equipData.equipType);
+            isEquipped = (equipped == selectedItem.itemData);
+        }
+
+        if(isEquipped && (selectedItem.amount - currentAmount) <= 0)
+        {
+            Debug.Log("‘•”õ’†‚Ì‚½‚ß”„‹p‚Å‚«‚Ü‚¹‚ñ");
+            return;
+        }
+
         if (!selectedItem.itemData.canSell)
         {
             Debug.LogError("”„‹p•s‰ÂƒAƒCƒeƒ€‚Å‚·");
@@ -369,10 +465,17 @@ public class SellShopUI : MonoBehaviour
 
         int total = selectedItem.itemData.sellPrice * currentAmount;
 
+        bool willRemoveRow = (selectedItem.amount - currentAmount) <= 0;
+
         InventoryManager.Instance.RemoveItem(selectedItem.itemData, currentAmount);
+
         GameManager.Instance.AddMoney(total);
 
         confirmPanel.SetActive(false);
+        if(amountUIRoot != null) amountUIRoot.SetActive(false);
+        if(priceUIRoot != null) priceUIRoot.SetActive(false);
+        if(lockoverlay != null) lockoverlay.SetActive(false);
+        if(sellButton != null) sellButton.SetActive(false);
 
         Refresh();
     }
@@ -399,7 +502,6 @@ public class SellShopUI : MonoBehaviour
         sellButton.SetActive(false);
         selectedItem = null;
         Refresh();
-        InputManager.Instance.IgnoreNextSubmit();
     }
 
     public void Close()

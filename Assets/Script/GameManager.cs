@@ -3,11 +3,13 @@ using UnityEngine;
 // 現在のゲームの状態を表す配列
 public enum GameState
 {
-    Exploring,  // 探検(自由行動)
-    Dialogue,   // 会話中
-    Event,      // イベント中
-    Menu,       // メニュー閲覧中
-    Shop        // 買い物中
+    Exploring,    // 探検(自由行動)
+    Dialogue,     // 会話中
+    Event,        // イベント中
+    Menu,         // メニュー閲覧中
+    Shop,         // 買い物中
+    BattleCommand,// コマンド選択中
+    BattleExecute // 戦闘実行中
 }
 
 public class GameManager : MonoBehaviour
@@ -20,7 +22,15 @@ public class GameManager : MonoBehaviour
     public bool IsSceneTransitioning { get; private set; }
     // お金にまつわる変数
     public int Money { get; private set; } = 500;
-    
+    // プレイヤーのMainMoveスクリプトを保持する変数
+    public MainMove Player { get; private set; }
+    // Playerをセットする関数
+    public void SetPlayer(MainMove player)
+    {
+        // Playerに代入
+        Player = player;
+    }
+
     // Startより早く、オブジェクトが生成された直後に実行される
     void Awake()
     {
@@ -45,7 +55,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("ゲーム状態が変更されました:" + state);
 
         // 状態に合わせてプレイヤーの動きを制御
-        MainMove player = Object.FindFirstObjectByType<MainMove>();
+        MainMove player = Player;
+        // Playerが存在するなら
         if (player != null)
         {
             // ゲーム状態が自由行動じゃない限りメニューをロックする
@@ -83,8 +94,10 @@ public class GameManager : MonoBehaviour
         Debug.Log($"お金を手に入れた! 現在の所持金: {Money}");
     }
 
+    // 指定した金額に所持金を変更する関数
     public void SetMoney(int value)
     {
+        // 代入された金額をそのまま所持金にする
         Money = value;
     }
 
@@ -124,6 +137,7 @@ public class GameManager : MonoBehaviour
     // インベントリ画面を開く関数
     public void OpenInventory()
     {
+        Debug.Log("OpenInventory PlayerStatus: " + (PlayerStatus.Instance == null ? "NULL" : PlayerStatus.Instance.currentHP.ToString()));
         // ゲームステータスをMenuに変更する
         ChangeState(GameState.Menu);
         // MenuManagerのInstanceがあるなら
@@ -134,8 +148,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // セーブ可能かどうかを返す関数
     public bool CanSave()
     {
+        // ゲーム状態が自由行動かメニューのときにセーブ可能
         return CurrentState == GameState.Exploring ||
             CurrentState == GameState.Menu;
     }

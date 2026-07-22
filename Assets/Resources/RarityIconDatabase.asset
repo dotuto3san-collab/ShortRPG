@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a38cd1b9bce10d4696b4154e9b7ff42, type: 3}
+  m_Name: RarityIconDatabase
+  m_EditorClassIdentifier: 
+  rarityIcons:
+  - rarity: 0
+    icon: {fileID: 8768126948814135764, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 1
+    icon: {fileID: -1442778070, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 0
+    icon: {fileID: 0}
+  - rarity: 2
+    icon: {fileID: -481498716, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 3
+    icon: {fileID: 2018928926, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 4
+    icon: {fileID: 1795180667, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 5
+    icon: {fileID: -1683445939, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 6
+    icon: {fileID: -1234564479, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 7
+    icon: {fileID: 1495673641, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 8
+    icon: {fileID: -612506210, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}
+  - rarity: 9
+    icon: {fileID: -1780554185, guid: 6ce947720d6e0e5458069d75b4b6651f, type: 3}

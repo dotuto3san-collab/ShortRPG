@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
+  m_Name: YaibanoIsi
+  m_EditorClassIdentifier: 
+  itemId: 31
+  itemName: "\u5203\u306E\u77F3"
+  description: "\u6575\u306B50\u30C0\u30E1\u30FC\u30B8\n\u5305\u4E01\u306E\u3088\u3046\u306B\u5207\u308C\u308B\u77F3\u3002\u592A\u53E4\u306E\u6614\u306F\u6B66\u5668\u306B\u4F7F\u308F\u308C\u3066\u3044\u305F\u3068\u304B\u3002"
+  icon: {fileID: 0}
+  buyPrice: 50
+  sellPrice: 25
+  canSell: 1
+  canUseInBattle: 1
+  canUseInField: 0
+  useEffect: {fileID: 11400000, guid: d0220c4b764f3634191932e8bcc64bd8, type: 2}
+  equipData:
+    attackPower: 0
+    equipType: 0
+  rarity: 1

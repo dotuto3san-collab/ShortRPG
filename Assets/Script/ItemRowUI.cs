@@ -17,13 +17,53 @@ public class ItemRowUI : MonoBehaviour, ISubmitHandler
         this.item = item;
 
         nameText.text = item.itemData.itemName;
-        amountText.text = item.amount.ToString();
+
+        int displayAmount = ItemDisplayHelper.GetDisplayAmount(item);
+        amountText.text = displayAmount.ToString();
 
         var selectable = GetComponent<Selectable>();
         if(selectable == null)
         {
             Debug.LogError("Selectable‚ª•t‚¢‚Ä‚Ü‚¹‚ñ: " + gameObject.name);
         }
+
+        UpdateEquipColor();
+    }
+
+    private void UpdateEquipColor()
+    {
+        if(EquipmentManager.Instance ==  null || item == null || item.itemData == null)
+        {
+            SetDefaultColor();
+            return;
+        }
+
+        var equipType = item.itemData.equipData?.equipType;
+
+        if(equipType == null)
+        {
+            SetDefaultColor();
+            return;
+        }
+
+        var equipped = EquipmentManager.Instance.GetEquipped(equipType.Value);
+
+        if(equipped == item.itemData)
+        {
+            nameText.color = new Color(0f, 0.4f, 1f);
+            amountText.color = new Color(0, 0.4f, 1f);
+        }
+        else
+        {
+            SetDefaultColor();
+            return;
+        }
+    }
+
+    void SetDefaultColor()
+    {
+        nameText.color = Color.black;
+        amountText.color = Color.black;
     }
 
     public InventoryItem GetItem()

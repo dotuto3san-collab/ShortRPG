@@ -6,7 +6,8 @@ public enum MenuState
 {
     Main,
     Item,
-    Status
+    Status,
+    Equipment
 }
 public class MenuManager : MonoBehaviour
 {
@@ -30,15 +31,28 @@ public class MenuManager : MonoBehaviour
     // Inspectorにて、使えない時の画像スプライトを参照
     [SerializeField] private Sprite disabledSprite;
 
+    [Header("装備パネル")]
+    [SerializeField] private GameObject equipmentPanel;
+
     // メニューを開いているかどうかをチェック  
     private bool isMenuOpen = false;
+    // 最後に選択されていたメインメニューのボタンを保存する変数
+    private GameObject lastSelectedMainButton;
 
     void Awake()
     {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         // インスタンスの宣言
         Instance = this;
         // メニュー画面を無効化(gameが始まった時はまだ表示しない)
         if(menuPanel != null ) menuPanel.SetActive( false );
+        if(itemListPanel != null ) itemListPanel.SetActive( false );
+        if(statusPanel != null ) statusPanel.SetActive( false );
+        if(equipmentPanel != null ) equipmentPanel.SetActive( false );
     }
     // Update is called once per frame
     void Update()
@@ -55,6 +69,14 @@ public class MenuManager : MonoBehaviour
         // もしメニュー画面を開いているなら
         if(isMenuOpen)
         {
+            if(CurrentMenuState == MenuState.Main && EventSystem.current != null)
+            {
+                var current = EventSystem.current.currentSelectedGameObject;
+                if (current != null)
+                {
+                    lastSelectedMainButton = current;
+                }
+            }
             // マウスによる誤操作を検知
             HandleMenuLogic();
         }
@@ -127,7 +149,7 @@ public class MenuManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             // もしクリックした場所がUIの上でない(画面外をクリックした)なら閉じる
-            if (!EventSystem.current.IsPointerOverGameObject())
+            if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
             {
                 ToggleMenu();
                 // メニューを閉じたので処理を終了
@@ -158,6 +180,11 @@ public class MenuManager : MonoBehaviour
         }
     }
 
+    public void OpenEquipmentMenu()
+    {
+        SetMenuState(MenuState.Equipment);
+    }
+
     public void CloseMenu()
     {
         isMenuOpen = false;
@@ -169,6 +196,8 @@ public class MenuManager : MonoBehaviour
         {
             EventSystem.current.SetSelectedGameObject(null);
         }
+
+        lastSelectedMainButton = null;
     }
 
     public void SetMenuState(MenuState state)
@@ -177,14 +206,22 @@ public class MenuManager : MonoBehaviour
 
         if(itemListPanel != null) itemListPanel.SetActive(false);
         if(statusPanel != null) statusPanel.SetActive(false);
+        if(equipmentPanel != null) equipmentPanel.SetActive(false);
 
         switch (state)
         {
             case MenuState.Main:
-                if(EventSystem.current != null && firstSelectedButton != null)
+                if (EventSystem.current != null)
                 {
-                    EventSystem.current.SetSelectedGameObject(null);
-                    EventSystem.current.SetSelectedGameObject(firstSelectedButton);
+                    GameObject target = lastSelectedMainButton != null
+                        ? lastSelectedMainButton
+                        : firstSelectedButton;
+
+                    if(target != null)
+                    {
+                        EventSystem.current.SetSelectedGameObject(null);
+                        EventSystem.current.SetSelectedGameObject(target);
+                    }
                 }
                 break;
 
@@ -194,6 +231,10 @@ public class MenuManager : MonoBehaviour
 
             case MenuState.Status:
                 if (statusPanel != null) statusPanel.SetActive(true);
+                break;
+
+            case MenuState.Equipment:
+                if(equipmentPanel != null) equipmentPanel.SetActive(true);
                 break;
         }
     }

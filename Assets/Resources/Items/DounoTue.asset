@@ -19,5 +19,10 @@ MonoBehaviour:
   buyPrice: 250
   sellPrice: 100
   canSell: 1
-  type: 1
-  rarity: 1
+  canUseInBattle: 0
+  canUseInField: 0
+  useEffect: {fileID: 0}
+  equipData:
+    attackPower: 10
+    equipType: 1
+  rarity: 2

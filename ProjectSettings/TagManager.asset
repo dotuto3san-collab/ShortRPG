@@ -51,6 +51,9 @@ TagManager:
   - name: Object2
     uniqueID: 3445219957
     locked: 0
+  - name: EncounterArea
+    uniqueID: 70578867
+    locked: 0
   - name: Character
     uniqueID: 1540869487
     locked: 0

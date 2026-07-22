@@ -20,6 +20,15 @@ public class MainMove : MonoBehaviour
     private bool isMoving; 
     // プレイヤーの入力を制限する
     public bool isInputLocked;
+
+    void Start()
+    {
+        if(GameManager.Instance != null)
+        {
+            GameManager.Instance.SetPlayer(this);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -102,6 +111,11 @@ public class MainMove : MonoBehaviour
 
         // 誤差をなくすためにendPos地点でピタッと固定
         transform.position = endPos;
+        // 一マス歩いたのでエンカウント判定
+        if(EncounterManager.Instance != null)
+        {
+            EncounterManager.Instance.OnPlayerStep(transform.position);
+        }
         // 移動中フラグを解除
         isMoving = false;
         // 到着時にもう一度IsMovingを更新して確実にIdleへ移行させる

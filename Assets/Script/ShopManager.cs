@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using JetBrains.Annotations;
 
 public class ShopManager : MonoBehaviour
 {
@@ -38,8 +38,13 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI boughtGoldText;
     [SerializeField] private TMPro.TextMeshProUGUI totalPriceText;
 
+    [SerializeField] private Image rankImage;
+    [SerializeField] private RarityIconDatabase rarityDB;
+
     private int currentAmount = 1;
     private int maxAmount = 1;
+
+    private int lastSelectedIndex = 0;
 
     private float inputTimer = 0f;
     private float inputInterval = 0.15f;
@@ -73,6 +78,9 @@ public class ShopManager : MonoBehaviour
     public void OpenShop(List<ItemData>inventory)
     {
         currentShopInventory = inventory;
+
+        lastSelectedIndex = 0;
+
         CurrentState = ShopState.ItemSelection;
         OpenItemSelection();
     }
@@ -83,8 +91,6 @@ public class ShopManager : MonoBehaviour
 
         if(shopMenuPanel == null) return;
 
-        InputManager.Instance.IgnoreNextSubmit();
-
         shopMenuPanel.SetActive(true);
         CurrentState = ShopState.ItemSelection;
         RefreshShopList();
@@ -93,7 +99,6 @@ public class ShopManager : MonoBehaviour
 
     public void OpenBuyConfirm()
     {
-        InputManager.Instance.IgnoreNextSubmit();
 
         int playerGold = GameManager.Instance.Money;
         int price = SelectedItem.buyPrice;
@@ -142,6 +147,11 @@ public class ShopManager : MonoBehaviour
         if (confirmItemName != null)
         {
             confirmItemName.text = SelectedItem.itemName;
+        }
+
+        if(rankImage != null && rarityDB != null && SelectedItem != null)
+        {
+            rankImage.sprite = rarityDB.GetIcon(SelectedItem.rarity);
         }
 
         if(buyConfirmFirstSelected != null && EventSystem.current != null)
@@ -322,14 +332,63 @@ public class ShopManager : MonoBehaviour
             if(i == 0) firstButton = slotObj;
         }
 
+        StartCoroutine(SetupNavigationNextFrame());
+
         if(firstButton != null)
         {
             EventSystem.current.SetSelectedGameObject(firstButton);
+        }
+
+        
+    }
+
+    private IEnumerator SetupNavigationNextFrame()
+    {
+        yield return null;
+        int count = itemListContainer.childCount;
+
+        for(int i = 0; i < count; i++)
+        {
+            var selectable = itemListContainer.GetChild(i).GetComponent<Selectable>();
+            if(selectable == null) continue;
+
+            var nav = new Navigation()
+            {
+                mode = Navigation.Mode.Explicit,
+                selectOnLeft = null,
+                selectOnRight = null
+            };
+
+            nav.selectOnUp = i == 0
+                ? itemListContainer.GetChild(count - 1).GetComponent<Selectable>()
+                : itemListContainer.GetChild(i - 1).GetComponent<Selectable>();
+
+            nav.selectOnDown = i == count - 1
+                ? itemListContainer.GetChild(0).GetComponent<Selectable>()
+                : itemListContainer.GetChild(i + 1).GetComponent<Selectable>();
+
+            selectable.navigation = nav;
+        }
+
+        if(count > 0 && EventSystem.current != null)
+        {
+            int index = Mathf.Clamp(lastSelectedIndex, 0, count - 1);
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(itemListContainer.GetChild(index).gameObject);
         }
     }
 
     private void OnItemSelected(ItemData data)
     {
+        if(EventSystem.current != null)
+        {
+            var selected = EventSystem.current.currentSelectedGameObject;
+            if (selected != null && selected.transform.IsChildOf(itemListContainer))
+            {
+                lastSelectedIndex = selected.transform.GetSiblingIndex();
+            }
+        }
+
         SetSelectedItem(data);
         OpenBuyConfirm();
     }
@@ -347,16 +406,7 @@ public class ShopManager : MonoBehaviour
             if(selectable == null) continue;
 
             Navigation nav = selectable.navigation;
-
-            if (enable)
-            {
-                nav.mode = Navigation.Mode.Automatic;
-            }
-            else
-            {
-                nav.mode = Navigation.Mode.None;
-            }
-
+            nav.mode = enable ? Navigation.Mode.Explicit : Navigation.Mode.None;
             selectable.navigation = nav;
         }
     }
@@ -392,7 +442,6 @@ public class ShopManager : MonoBehaviour
 
     public void CloseBuyConfirm()
     {
-        InputManager.Instance.IgnoreNextSubmit();
 
         if(buyConfirmPanel != null)
         {
@@ -406,15 +455,15 @@ public class ShopManager : MonoBehaviour
 
         if(itemListContainer.childCount > 0 && EventSystem.current != null)
         {
+            int index = Mathf.Clamp(lastSelectedIndex, 0, itemListContainer.childCount - 1);
+
             EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(itemListContainer.GetChild(0).gameObject);
+            EventSystem.current.SetSelectedGameObject(itemListContainer.GetChild(index).gameObject);
         }
     }
 
     public void CloseItemSelection()
     {
-        InputManager.Instance.IgnoreNextSubmit();
-
         if (shopMenuPanel != null)
         {
             shopMenuPanel.SetActive(false);

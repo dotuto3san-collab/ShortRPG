@@ -1,0 +1,12 @@
+using UnityEngine;
+using System.Collections;
+
+public class EscapeCommand : IBattleCommand
+{
+    public IEnumerator Execute(BattleUnit user,BattleUnit target)
+    {
+        yield return BattleLogUI.Instance.ShowLogAndWait("êÌì¨Ç©ÇÁì¶Ç∞èoÇµÇΩÅI");
+
+        BattleManager.Instance.RequestEscape();
+    }
+}

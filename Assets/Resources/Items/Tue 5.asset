@@ -13,11 +13,16 @@ MonoBehaviour:
   m_Name: Tue 5
   m_EditorClassIdentifier: 
   itemId: 008
-  itemName: Tue5
+  itemName: "\u719F\u7DF4\u8005\u306E\u6756"
   description: 
   icon: {fileID: 0}
   buyPrice: 0
   sellPrice: 0
   canSell: 1
-  type: 0
-  rarity: 0
+  canUseInBattle: 0
+  canUseInField: 0
+  useEffect: {fileID: 0}
+  equipData:
+    attackPower: 0
+    equipType: 1
+  rarity: 7
