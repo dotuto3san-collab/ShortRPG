@@ -52,6 +52,14 @@ public class InteractDetector : MonoBehaviour
                 GameManager.Instance.ChangeState(npc.GetInteractionState());
             }
         }
+
+        TreasureChest chest = obj.GetComponent<TreasureChest>();
+
+        if(chest != null)
+        {
+            chest.Interact();
+            return;
+        }
     }
 
     // アクションボックスにオブジェクトが入った時

@@ -93,8 +93,22 @@ public class InkManager : MonoBehaviour
             // 現在の選択(メニューボタンなど)を解除して決定キーを会話に集中させる
             EventSystem.current.SetSelectedGameObject(null);
         }
+
         // storyにinkJsontextファイルを入れる
-        story = new Story(inkJson.text);
+         story = new Story(inkJson.text);
+
+        story.BindExternalFunction(
+            "SetFlag",
+            (string flagName) => SetFlag(flagName),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "HasFlag",
+            (string flagName) => HasFlag(flagName),
+            lookaheadSafe: false
+        );
+
         // 会話が始まったので会話ウィンドウを表示
         dialoguePanel.SetActive(true);
         // 三角アイコンが存在するなら
@@ -120,6 +134,28 @@ public class InkManager : MonoBehaviour
         }
         // 文を生成する関数
         ContinueStory();
+    }
+
+    public void SetFlag(string flagName)
+    {
+        if(StoryStateManager.Instance == null)
+        {
+            Debug.LogWarning($"StoryStateManager.Instance is null.");
+            return;
+        }
+
+        StoryStateManager.Instance.SetFlag(flagName);
+    }
+
+    public bool HasFlag(string flagName)
+    {
+        if(StoryStateManager.Instance == null)
+        {
+            Debug.LogWarning($"StoryStateManager.Instance is null.");
+            return false;
+        }
+
+        return StoryStateManager.Instance.HasFlag(flagName);
     }
 
     // 会話中にどの状態か判定し対応した処理を行う

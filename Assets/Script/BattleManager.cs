@@ -363,6 +363,43 @@ public class BattleManager : MonoBehaviour
                     EndBattleRoutine();
                     yield break;
                 }
+
+                if (enemies.TrueForAll(e => e.IsDead()))
+                {
+                    int interruptExpGained = 0;
+
+                    foreach (var deadEnemy in enemies)
+                    {
+                        if (deadEnemy.IsDead() && !deadEnemy.hasGivenExp)
+                        {
+                            deadEnemy.hasGivenExp = true;
+                            interruptExpGained += deadEnemy.data.expReward;
+                        }
+                    }
+
+                    if (interruptExpGained > 0)
+                    {
+                        int prevLevel = PlayerStatus.Instance.GetLevel();
+                        int levelUpCount = PlayerStatus.Instance.AddExperience(interruptExpGained);
+                        int newLevel = PlayerStatus.Instance.GetLevel();
+
+                        yield return BattleLogUI.Instance.ShowLogAndWait(
+                            $"敵を全て倒した！\n経験値を{interruptExpGained}獲得した",
+                            true
+                        );
+
+                        if (levelUpCount > 0)
+                        {
+                            yield return BattleLogUI.Instance.ShowLogAndWait(
+                                $"{player.GetUnitName()}はレベルアップした！\nLv.{prevLevel} → {newLevel}",
+                                true
+                            );
+                        }
+                    }
+
+                    EndBattleRoutine();
+                    yield break;
+                }
             }
         }
     }
