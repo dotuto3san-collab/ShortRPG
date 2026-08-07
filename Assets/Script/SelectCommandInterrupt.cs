@@ -5,6 +5,11 @@ public class SelectCommandInterrupt : IBattleCommand
 {
     public IEnumerator Execute(BattleUnit user, BattleUnit target)
     {
+        yield return BattleLogUI.Instance.ShowLogAndWait("追加コマンド発動！");
+
+        if (BattleManager.Instance.AreAllEnemiesDead())
+            yield break;
+
         GameManager.Instance.ChangeState(GameState.BattleCommand);
 
         if(BattleCommandUI.Instance != null)
@@ -15,10 +20,19 @@ public class SelectCommandInterrupt : IBattleCommand
 
         BattleManager.Instance.ClearSelectedCommand();
 
-        yield return new WaitUntil(() => BattleManager.Instance.HasSelectedCommand());
+        yield return new WaitUntil(() => 
+            BattleManager.Instance.HasSelectedCommand() ||
+            BattleManager.Instance.AreAllEnemiesDead());
 
-        var cmd = BattleManager.Instance.ConsumeSelectedCommand();
+        if(BattleManager.Instance.AreAllEnemiesDead())
+            yield break;
 
-        yield return cmd.Execute(user, BattleManager.Instance.GetSelectedTarget());
+        IBattleCommand command = BattleManager.Instance.ConsumeSelectedCommand();
+
+        BattleUnit selectedTarget = BattleManager.Instance.GetSelectedTarget();
+
+        GameManager.Instance.ChangeState(GameState.BattleExecute);
+
+        yield return command.Execute(user, selectedTarget);
     }
 }

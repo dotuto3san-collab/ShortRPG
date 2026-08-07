@@ -22,6 +22,12 @@ public class BattleManager : MonoBehaviour
     private bool canInterruptNow = false;
     private int reservedInterruptCount = 0;
 
+    private Queue<ReservedBattleAction> reservedCommands =
+        new Queue<ReservedBattleAction>();
+    private int reservedExtraActionCount = 0;
+
+    private bool isPlayerCommandPhase = false;
+
     private int maxSkillUsesPerUnit = 3;
     private Dictionary<int, int> skillUseCounts = new Dictionary<int, int>();
 
@@ -106,6 +112,14 @@ public class BattleManager : MonoBehaviour
         escapeRequested = false;
 
         interruptCommands.Clear();
+        reservedCommands.Clear();
+
+        reservedInterruptCount = 0;
+        reservedExtraActionCount = 0;
+
+        selectedCommand = null;
+        selectedTarget = null;
+
         reservedInterruptCount = 0;
         selectedCommand = null;
         selectedTarget = null;
@@ -114,7 +128,7 @@ public class BattleManager : MonoBehaviour
 
         currentSpecialGauge = maxSpecialGauge;
 
-        if(SpecialGaugeUI.Instance != null)
+        if (SpecialGaugeUI.Instance != null)
         {
             SpecialGaugeUI.Instance.SetGauge(currentSpecialGauge,maxSpecialGauge);
         }
@@ -168,6 +182,8 @@ public class BattleManager : MonoBehaviour
                 yield break;
             }
 
+            isPlayerCommandPhase = true;
+
             GameManager.Instance.ChangeState(GameState.BattleCommand);
 
             if (BattleCommandUI.Instance != null)
@@ -180,7 +196,62 @@ public class BattleManager : MonoBehaviour
 
             yield return new WaitUntil(() => selectedCommand != null || escapeRequested);
             
-            if(!(selectedCommand is EscapeCommand))
+            if(escapeRequested)
+            {
+                EndBattleRoutine();
+                yield break;
+            }
+
+            reservedCommands.Enqueue(
+                new ReservedBattleAction(
+                    selectedCommand,
+                    selectedTarget));
+
+            selectedCommand = null;
+            selectedTarget = null;
+
+            while (HasReservedExtraAction())
+            {
+                yield return BattleLogUI.Instance.ShowLogAndWait("追加コマンド発動！");
+
+                GameManager.Instance.ChangeState(GameState.BattleCommand);
+
+                BattleCommandUI.Instance.ResetSelection();
+                BattleCommandUI.Instance.Show();
+
+                yield return new WaitUntil(() => selectedCommand != null);
+
+                reservedCommands.Enqueue(
+                    new ReservedBattleAction(
+                        selectedCommand,
+                        selectedTarget));
+
+                selectedCommand = null;
+                selectedTarget = null;
+
+                ConsumeReservedExtraAction();
+            }
+
+            isPlayerCommandPhase = false;
+
+            GameManager.Instance.ChangeState(GameState.BattleExecute);
+
+            while(reservedCommands.Count > 0)
+            {
+                if (AreAllEnemiesDead())
+                {
+                    reservedCommands.Clear();
+                    break;
+                }
+
+                var action = reservedCommands.Dequeue();
+
+                yield return action.Command.Execute(
+                    player,
+                    action.Target);
+            }
+
+            if (!(selectedCommand is EscapeCommand))
             {
                 canInterruptNow = true;
                 yield return TryProcessInterrupt(player);
@@ -223,20 +294,6 @@ public class BattleManager : MonoBehaviour
                     yield break;
                 }
             }
-
-            isExecuting = true;
-
-            GameManager.Instance.ChangeState(GameState.BattleExecute);
-
-            if(selectedTarget == null && selectedCommand is AttackCommand)
-            {
-                Debug.LogError("Target is null");
-                selectedCommand = null;
-                isExecuting = false;
-                continue;
-            }
-
-            yield return selectedCommand.Execute(player, selectedTarget);
 
             bool allDead = enemies.TrueForAll(e => e.IsDead());
 
@@ -462,16 +519,27 @@ public class BattleManager : MonoBehaviour
         selectedTarget = target;
     }
 
+    public void EnqueueReservedAction(
+        IBattleCommand command,
+        BattleUnit target)
+    {
+        if (command == null)
+        {
+            Debug.LogError("Reserved command is null");
+            return;
+        }
+
+        reservedCommands.Enqueue(
+            new ReservedBattleAction(
+                command,
+                target));
+    }
+
     public void RequestInterrupt(IBattleCommand command)
     {
         if (command == null)  return;
 
         interruptCommands.Enqueue(command);
-
-        if (!canInterruptNow)
-        {
-            reservedInterruptCount++;
-        }
     }
 
     private IEnumerator TryProcessInterrupt(BattleUnit user)
@@ -486,11 +554,37 @@ public class BattleManager : MonoBehaviour
         {
             if (escapeRequested) yield break;
 
+            if (AreAllEnemiesDead())
+            {
+                interruptCommands.Clear();
+                reservedCommands.Clear();
+                reservedExtraActionCount = 0;
+                yield break;
+            }
+
             canInterruptNow = false;
 
             var cmd = interruptCommands.Dequeue();
 
             yield return cmd.Execute(user, null);
+        }
+    }
+
+    public void ReservedExtraAction()
+    {
+        reservedExtraActionCount++;
+    }
+
+    public bool HasReservedExtraAction()
+    {
+        return reservedExtraActionCount > 0;
+    }
+
+    public void ConsumeReservedExtraAction()
+    {
+        if (reservedExtraActionCount > 0)
+        {
+            reservedExtraActionCount--;
         }
     }
 
@@ -531,11 +625,25 @@ public class BattleManager : MonoBehaviour
 
         if (skill.type == SkillType.Utility)
         {
-            RequestInterrupt(new SelectCommandInterrupt());
+            if (isPlayerCommandPhase)
+            {
+                ReservedExtraAction();
+            }
+            else
+            {
+                RequestInterrupt(new SelectCommandInterrupt());
+            }
         }
         else
         {
-            RequestInterrupt(new SkillCommand(skill));
+            if (isPlayerCommandPhase)
+            {
+                EnqueueReservedAction(new SkillCommand(skill), null);
+            }
+            else
+            {
+                RequestInterrupt(new SkillCommand(skill));
+            }
         }
     }
 
@@ -553,7 +661,19 @@ public class BattleManager : MonoBehaviour
         var skill = PlayerStatus.Instance.GetSkill(SkillSlotType.Special);
         if(skill == null) return;
 
-        RequestInterrupt(new SkillCommand(skill));
+        if(isPlayerCommandPhase)
+        {
+            EnqueueReservedAction(new SkillCommand(skill), null);
+        }
+        else
+        {
+            RequestInterrupt(new SkillCommand(skill));
+        }
+    }
+
+    public bool AreAllEnemiesDead()
+    {
+        return enemies.TrueForAll(e => e == null || e.IsDead());
     }
 
     private void EndBattleRoutine()
@@ -564,6 +684,12 @@ public class BattleManager : MonoBehaviour
         escapeRequested = false;
 
         skillUseCounts.Clear();
+
+        interruptCommands.Clear();
+        reservedCommands.Clear();
+
+        reservedExtraActionCount = 0;
+        reservedInterruptCount = 0;
 
         if (SkillBarUI.Instance != null)
         {

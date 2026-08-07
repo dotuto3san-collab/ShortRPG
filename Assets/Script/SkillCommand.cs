@@ -13,6 +13,9 @@ public class SkillCommand : IBattleCommand
 
     public IEnumerator Execute(BattleUnit user, BattleUnit target)
     {
+        if (BattleManager.Instance.AreAllEnemiesDead())
+            yield break;
+
         yield return BattleLogUI.Instance.ShowLogAndWait(
             "ƒXƒLƒ‹”­“®I"
             );

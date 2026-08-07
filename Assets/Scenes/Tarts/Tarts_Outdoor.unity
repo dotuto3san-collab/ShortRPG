@@ -26894,7 +26894,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cloasedSprite: {fileID: -1804599553, guid: 6c32fbe53bdeb3a4fb17f5a1d7eca218, type: 3}
   openedSprite: {fileID: 1232721460, guid: 6c32fbe53bdeb3a4fb17f5a1d7eca218, type: 3}
-  itemData: {fileID: 11400000, guid: 475f82f556dda9b4cb00c2e6859189a0, type: 2}
+  itemData: {fileID: 11400000, guid: d2a36d10a2a9c92419853cbbf00f4d2e, type: 2}
   itemAmount: 1
 --- !u!212 &1104679125
 SpriteRenderer:
