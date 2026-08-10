@@ -12,6 +12,9 @@ public class EquipmentStatusUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI weaponText;
     [SerializeField] private TextMeshProUGUI armorText;
 
+    [SerializeField] private Image weaponIconImage;
+    [SerializeField] private Image armorIconImage;
+
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private TextMeshProUGUI chargeText;
@@ -137,6 +140,34 @@ public class EquipmentStatusUI : MonoBehaviour
         if(armorText != null)
         {
             armorText.text = armor != null ? armor.itemName : "ïÅíiíÖ";
+        }
+
+        if(weaponIconImage != null)
+        {
+            if(weapon != null && weapon.icon != null)
+            {
+                weaponIconImage.sprite = weapon.icon;
+                weaponIconImage.enabled = true;
+            }
+            else
+            {
+                weaponIconImage.sprite = null;
+                weaponIconImage.enabled = false;
+            }
+        }
+
+        if(armorIconImage != null)
+        {
+            if(armor != null && armor.icon != null)
+            {
+                armorIconImage.sprite = armor.icon;
+                armorIconImage.enabled = true;
+            }
+            else
+            {
+                armorIconImage.sprite = null;
+                armorIconImage.enabled = false;
+            }
         }
     }
 

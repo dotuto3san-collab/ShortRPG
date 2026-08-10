@@ -18,6 +18,11 @@ MonoBehaviour:
     unlockMagics:
     - {fileID: 11400000, guid: 85af3eb545bc47f4db6492da1b065b7f, type: 2}
     - {fileID: 11400000, guid: f9ab73a6db968444aa0a32da32522df0, type: 2}
+    - {fileID: 11400000, guid: c809905f4002ba843913d5e99a67105c, type: 2}
+    - {fileID: 11400000, guid: a99fefc08eae88848a1370dfceaa73c8, type: 2}
+    - {fileID: 11400000, guid: 164ff6e995c99fd4eb647ac661425dcf, type: 2}
+    - {fileID: 11400000, guid: 66da3dd93474eeb4ba5bc4704fa158ca, type: 2}
+    - {fileID: 11400000, guid: d2b0a8754009f8246be66f8adcd4cc8d, type: 2}
     unlockSkills:
     - {fileID: 11400000, guid: 80cf65137ba9b6842b3407f2736f3988, type: 2}
     - {fileID: 11400000, guid: 1a7c1ed57c0880f49ae2db1f3b84c0fb, type: 2}

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 33
   itemName: "\u65C5\u4EBA\u306E\u670D"
+  effectText: 
   description: "\u3044\u3064\u3082\u7740\u3066\u3044\u308B\u670D"
   icon: {fileID: 0}
   buyPrice: 0

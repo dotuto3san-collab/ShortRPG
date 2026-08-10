@@ -11,6 +11,10 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI focusItemNameText;
     [SerializeField] private TextMeshProUGUI focusItemAmountText;
 
+    [SerializeField] private Image itemIconImage;
+    [SerializeField] private TextMeshProUGUI itemEffectText;
+    [SerializeField] private TextMeshProUGUI itemDescriptionText;
+
     [SerializeField] private Image rankImage;
     [SerializeField] private RarityIconDatabase rarityDB;
 
@@ -41,7 +45,13 @@ public class InventoryUI : MonoBehaviour
 
     void UpdateFocusedItemDisplay()
     {
-        if(focusItemNameText == null &&  focusItemAmountText == null) return;
+        if(focusItemNameText == null &&  focusItemAmountText == null
+            && itemIconImage == null && itemEffectText == null
+            && itemDescriptionText == null)
+        {
+            return;
+        }
+
         if (EventSystem.current == null) return;
 
         GameObject selected = EventSystem.current.currentSelectedGameObject;
@@ -68,6 +78,22 @@ public class InventoryUI : MonoBehaviour
             
             focusItemNameText.color = color;
             focusItemAmountText.color = color;
+        }
+
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = item.itemData.icon;
+            itemIconImage.enabled = item.itemData.icon != null;
+        }
+
+        if(itemEffectText != null)
+        {
+            itemEffectText.text = item.itemData.effectText;
+        }
+
+        if(itemDescriptionText != null)
+        {
+            itemDescriptionText.text = item.itemData.description;
         }
 
         if (rankImage != null && rarityDB != null)
@@ -157,6 +183,15 @@ public class InventoryUI : MonoBehaviour
 
         if (focusItemNameText != null) focusItemNameText.text = "";
         if (focusItemAmountText != null) focusItemAmountText.text = "";
+
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = null;
+            itemIconImage.enabled = false;
+        }
+
+        if (itemEffectText != null) itemEffectText.text = "";
+        if (itemDescriptionText != null) itemDescriptionText.text = "";
 
         foreach (Transform child in content)
         {

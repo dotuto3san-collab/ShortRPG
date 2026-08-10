@@ -9,6 +9,11 @@ public class ItemData : ScriptableObject
     // アイテムの名前を入力
     public string itemName;
 
+    [Header("性能説明")]
+    [TextArea(1, 3)]
+    public string effectText;
+
+    [Header("詳細説明")]
     [TextArea]
     // 説明文を記入
     public string description;

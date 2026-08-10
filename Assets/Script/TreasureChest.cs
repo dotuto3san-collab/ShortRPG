@@ -1,10 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 public class TreasureChest : MonoBehaviour
 {
     [Header("宝箱の画像")]
-    [SerializeField] private Sprite cloasedSprite;
+    [SerializeField] private Sprite closedSprite;
     [SerializeField] private Sprite openedSprite;
+    [SerializeField] private Sprite halfOpenedSprite;
 
     [Header("中身")]
     [SerializeField] private ItemData itemData;
@@ -30,31 +32,33 @@ public class TreasureChest : MonoBehaviour
         if (isOpened)
         {
             Debug.Log("この宝箱は既に開いています。");
+            StartCoroutine(
+                MessageUI.Instance.ShowMessage("この宝箱は空だ"));
             return;
         }
 
-        Open();
+        StartCoroutine(OpenRoutine());
     }
 
-    public void Open()
+    public IEnumerator OpenRoutine()
     {
         if (isOpened)
         {
-            return;
+            yield break;
         }
 
         if(itemData == null)
         {
             Debug.LogError(
                 $"TreasureChest: 中身のItemDataが設定されていません。Object = {gameObject.name}");
-            return;
+            yield break;
         }
 
         if(itemAmount <= 0)
         {
             Debug.LogError(
                 $"TreasureChest: itemAmountが不正です。Amount = {itemAmount}");
-            return;
+            yield break;
         }
         
         if(spriteRenderer != null && openedSprite != null)
@@ -69,17 +73,28 @@ public class TreasureChest : MonoBehaviour
             Debug.Log($"{itemData.itemName}を{itemAmount}個手に入れようとした");
             Debug.Log($"しかし、これ以上持てないので宝箱に戻した");
 
-            if(spriteRenderer != null && cloasedSprite != null)
+            yield return MessageUI.Instance.ShowMessage(
+                $"{itemData.itemName}を{itemAmount}個手に入れようとした");
+
+            yield return MessageUI.Instance.ShowMessage(
+                $"しかし、これ以上持てないので宝箱に戻した");
+
+            if(spriteRenderer != null && closedSprite != null)
             {
-                spriteRenderer.sprite = cloasedSprite;
+                spriteRenderer.sprite = halfOpenedSprite;
             }
 
-            return;
+            yield break;
         }
 
         InventoryManager.Instance.AddItem(itemData, itemAmount);
 
         isOpened = true;
+
+        yield return MessageUI.Instance.ShowMessage(
+            $"{itemData.itemName}を{itemAmount}個手に入れた",
+            itemData.icon,
+            itemData.effectText);
 
         Debug.Log(
             $"宝箱を開けました: {gameObject.name} / {itemData.itemName} ×{itemAmount}");

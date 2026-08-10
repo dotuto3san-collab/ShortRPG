@@ -84,17 +84,18 @@ public class InputManager : MonoBehaviour
 
             if (sellUI != null && sellUI.IsOpen() && !sellUI.IsConfirmOpen())
             {
-                HandleRepeatNavKeyCommon(KeyCode.UpArrow, -1);
-                HandleRepeatNavKeyCommon(KeyCode.DownArrow, +1);
+                HandleRepeatNavKeyCommon(KeyCode.UpArrow,KeyCode.W, -1);
+                HandleRepeatNavKeyCommon(KeyCode.DownArrow,KeyCode.S, +1);
             }
 
             if (ShopManager.Instance.CurrentState == ShopManager.ShopState.ItemSelection)
             {
-                HandleRepeatNavKeyCommon(KeyCode.UpArrow, -1);
-                HandleRepeatNavKeyCommon(KeyCode.DownArrow, +1);  
+                HandleRepeatNavKeyCommon(KeyCode.UpArrow,KeyCode.W, -1);
+                HandleRepeatNavKeyCommon(KeyCode.DownArrow,KeyCode.S, +1);  
             }
-            
-            if(!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.DownArrow))
+
+            if (!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) &&
+               !Input.GetKey(KeyCode.DownArrow) && !Input.GetKey(KeyCode.S))
             {
                 if (EventSystem.current != null)
                 {
@@ -146,12 +147,24 @@ public class InputManager : MonoBehaviour
                 case MenuState.Equipment:
                 case MenuState.Main:
                 case MenuState.Status:
-                    HandleRepeatNavKeyCommon(KeyCode.UpArrow, -1);
-                    HandleRepeatNavKeyCommon(KeyCode.DownArrow, +1);
+                    HandleRepeatNavKeyCommon(KeyCode.UpArrow,KeyCode.W, -1);
+                    HandleRepeatNavKeyCommon(KeyCode.DownArrow,KeyCode.S, +1);
+                    break;
+
+                case MenuState.Ability:
+                    if(AbilityUI.Instance != null &&
+                       AbilityUI.Instance.CurrentState == AbilityUI.AbilityState.Magic)
+                    {
+                        HandleRepeatGridNavKey(KeyCode.UpArrow,KeyCode.W, 0, -1);
+                        HandleRepeatGridNavKey(KeyCode.DownArrow,KeyCode.S, 0, +1);
+                        HandleRepeatGridNavKey(KeyCode.LeftArrow,KeyCode.A, -1, 0);
+                        HandleRepeatGridNavKey(KeyCode.RightArrow,KeyCode.D, 1, 0);
+                    }
                     break;
             }
             
-            if(!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.DownArrow))
+            if(!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.DownArrow) &&
+               !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow))
             {
                 if (EventSystem.current != null)
                 {
@@ -164,24 +177,24 @@ public class InputManager : MonoBehaviour
         {
             if(BattleItemUI.Instance != null && BattleItemUI.Instance.IsActive())
             {
-                HandleRepeatGridNavKey(KeyCode.UpArrow, 0, -1);
-                HandleRepeatGridNavKey(KeyCode.DownArrow, 0, +1);
-                HandleRepeatGridNavKey(KeyCode.LeftArrow, -1, 0);
-                HandleRepeatGridNavKey(KeyCode.RightArrow, +1, 0);
+                HandleRepeatGridNavKey(KeyCode.UpArrow,KeyCode.W, 0, -1);
+                HandleRepeatGridNavKey(KeyCode.DownArrow,KeyCode.S, 0, +1);
+                HandleRepeatGridNavKey(KeyCode.LeftArrow,KeyCode.A, -1, 0);
+                HandleRepeatGridNavKey(KeyCode.RightArrow,KeyCode.D, +1, 0);
             }
 
             if(BattleMagicUI.Instance != null && BattleMagicUI.Instance.IsActive())
             {
-                HandleRepeatGridNavKey(KeyCode.UpArrow, 0, -1);
-                HandleRepeatGridNavKey(KeyCode.DownArrow, 0, +1);
-                HandleRepeatGridNavKey(KeyCode.LeftArrow, -1, 0);
-                HandleRepeatGridNavKey(KeyCode.RightArrow, +1, 0);
+                HandleRepeatGridNavKey(KeyCode.UpArrow,KeyCode.W, 0, -1);
+                HandleRepeatGridNavKey(KeyCode.DownArrow,KeyCode.S, 0, +1);
+                HandleRepeatGridNavKey(KeyCode.LeftArrow,KeyCode.A, -1, 0);
+                HandleRepeatGridNavKey(KeyCode.RightArrow,KeyCode.D, +1, 0);
             }
 
-            if(!Input.GetKey(KeyCode.UpArrow) &&
-               !Input.GetKey(KeyCode.DownArrow) &&
-               !Input.GetKey(KeyCode.LeftArrow) &&
-               !Input.GetKey(KeyCode.RightArrow))
+            if(!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) &&
+               !Input.GetKey(KeyCode.DownArrow) && !Input.GetKey(KeyCode.S) &&
+               !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.A) &&
+               !Input.GetKey(KeyCode.RightArrow) && !Input.GetKey(KeyCode.D))
             {
                 if(EventSystem.current != null)
                 {
@@ -191,12 +204,14 @@ public class InputManager : MonoBehaviour
 
             if (BattleCommandUI.Instance != null && BattleCommandUI.Instance.IsVisible())
             {
-                HandleRepeatNavKeyCommon(KeyCode.UpArrow, -1);
-                HandleRepeatNavKeyCommon(KeyCode.DownArrow, +1);
+                HandleRepeatNavKeyCommon(KeyCode.UpArrow,KeyCode.W, -1);
+                HandleRepeatNavKeyCommon(KeyCode.DownArrow,KeyCode.S, +1);
             }
 
-            if (!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.DownArrow) &&
-                !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow))
+            if (!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) &&
+                !Input.GetKey(KeyCode.DownArrow) && !Input.GetKey(KeyCode.S) &&
+                !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.A) &&
+                !Input.GetKey(KeyCode.RightArrow) && !Input.GetKey(KeyCode.D))
             {
                 if (EventSystem.current != null)
                 {
@@ -415,17 +430,20 @@ public class InputManager : MonoBehaviour
         
     }
 
-    private void HandleRepeatNavKeyCommon(KeyCode key, int direction)
+    private void HandleRepeatNavKeyCommon(KeyCode key, KeyCode altKey, int direction)
     {
         if(EventSystem.current == null) return;
 
-        if(Input.GetKeyDown(key))
+        bool keyDown = Input.GetKeyDown(key) || Input.GetKeyDown(altKey);
+        bool KeyHeld = Input.GetKey(key) || Input.GetKey(altKey);
+
+        if(keyDown)
         {
             navNextInputTime = Time.time + inputRepeatDelay;
             return;
         }
 
-        if (Input.GetKey(key))
+        if (KeyHeld)
         {
             EventSystem.current.sendNavigationEvents = false;
 
@@ -449,19 +467,22 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    private void HandleRepeatGridNavKey(KeyCode key, int xDir, int yDir)
+    private void HandleRepeatGridNavKey(KeyCode key, KeyCode altKey, int xDir, int yDir)
     {
         if (EventSystem.current == null) return;
 
         const int colume = 3;
 
-        if (Input.GetKeyDown(key))
+        bool keyDown = Input.GetKeyDown(key) || Input.GetKeyDown(altKey);
+        bool keyHeld = Input.GetKey(key) || Input.GetKey(altKey);
+
+        if (keyDown)
         {
             navNextInputTime = Time.time + inputRepeatDelay;
             return;
         }
 
-        if (Input.GetKey(key))
+        if (keyHeld)
         {
             EventSystem.current.sendNavigationEvents = false;
 

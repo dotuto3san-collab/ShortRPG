@@ -19,6 +19,11 @@ public class InteractDetector : MonoBehaviour
     // プレイヤーがInteractボタンを押したときに呼び出される関数
     public void OnInteract()
     {
+        if(MessageUI.Instance != null && MessageUI.Instance.IsShowing)
+        {
+            return;
+        }
+
         // currentTargetsに入っているオブジェクトがある場合
         if (currentTargets.Count > 0)
         {

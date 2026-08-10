@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 002
   itemName: "\u9285\u306E\u6756"
+  effectText: 
   description: "\u4E00\u822C\u7684\u306A\u6756\u3001\u653B\u6483+5"
   icon: {fileID: 0}
   buyPrice: 250
@@ -24,5 +25,7 @@ MonoBehaviour:
   useEffect: {fileID: 0}
   equipData:
     attackPower: 10
+    defensePower: 0
+    chargePower: 0
     equipType: 1
   rarity: 2

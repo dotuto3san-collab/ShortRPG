@@ -14,12 +14,14 @@ public class MainMove : MonoBehaviour
     // InspectorにてAnimatorを含んだEmptyを読み込み
     [SerializeField] private Animator animator; 
     // InspectorにてinterectBoxのEmptyを読み込み
-    [SerializeField] private Transform interactBox; 
-    
+    [SerializeField] private Transform interactBox;
+
     // 現在、一マス間を移動中かどうかを判定
-    private bool isMoving; 
+    private bool isMoving;
     // プレイヤーの入力を制限する
     public bool isInputLocked;
+
+    public bool IsMovementInputHeld { get; private set; }
 
     void Start()
     {
@@ -32,6 +34,17 @@ public class MainMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isInputLocked)
+        {
+            IsMovementInputHeld = false;
+        }
+        else
+        {
+            float rawH = Input.GetAxisRaw("Horizontal");
+            float rawV = Input.GetAxisRaw("Vertical");
+            IsMovementInputHeld = (rawH != 0f || rawV != 0f);
+        }
+
         // 移動中の場合や入力ロックが入ってる場合は無視
         if (isMoving || isInputLocked) return; 
         

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class ShopManager : MonoBehaviour
 {
@@ -33,13 +34,19 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI amountText;
     [SerializeField] private GameObject buyConfirmFirstSelected;
 
+    [Header("ÉAÉCÉeÉÄèÓïÒ")]
+    [SerializeField] private Image itemIcon;
+    [SerializeField] TextMeshProUGUI itemDescription;
+
+    [SerializeField] private Image rankImage;
+    [SerializeField] private RarityIconDatabase rarityDB;
+
     [Header("çwì¸ã‡äzï\é¶UI")]
     [SerializeField] private TMPro.TextMeshProUGUI itemSelectionGoldText;
     [SerializeField] private TMPro.TextMeshProUGUI boughtGoldText;
     [SerializeField] private TMPro.TextMeshProUGUI totalPriceText;
 
-    [SerializeField] private Image rankImage;
-    [SerializeField] private RarityIconDatabase rarityDB;
+    
 
     private int currentAmount = 1;
     private int maxAmount = 1;
@@ -99,7 +106,6 @@ public class ShopManager : MonoBehaviour
 
     public void OpenBuyConfirm()
     {
-
         int playerGold = GameManager.Instance.Money;
         int price = SelectedItem.buyPrice;
 
@@ -149,7 +155,18 @@ public class ShopManager : MonoBehaviour
             confirmItemName.text = SelectedItem.itemName;
         }
 
-        if(rankImage != null && rarityDB != null && SelectedItem != null)
+        if (itemIcon != null)
+        {
+            itemIcon.sprite = SelectedItem.icon;
+            itemIcon.enabled = SelectedItem.icon != null;
+        }
+
+        if(itemDescription != null)
+        {
+            itemDescription.text = SelectedItem.description;
+        }
+
+        if (rankImage != null && rarityDB != null && SelectedItem != null)
         {
             rankImage.sprite = rarityDB.GetIcon(SelectedItem.rarity);
         }
@@ -442,6 +459,16 @@ public class ShopManager : MonoBehaviour
 
     public void CloseBuyConfirm()
     {
+        if(itemIcon != null)
+        {
+            itemIcon.sprite = null;
+            itemIcon.enabled = false;
+        }
+
+        if(itemDescription != null)
+        {
+            itemDescription.text = "";
+        }
 
         if(buyConfirmPanel != null)
         {

@@ -7,6 +7,7 @@ public enum MenuState
     Main,
     Item,
     Status,
+    Ability,
     Equipment
 }
 public class MenuManager : MonoBehaviour
@@ -34,6 +35,9 @@ public class MenuManager : MonoBehaviour
     [Header("装備パネル")]
     [SerializeField] private GameObject equipmentPanel;
 
+    [Header("アビリティパネル")]
+    [SerializeField] private GameObject abilityPanel;
+
     // メニューを開いているかどうかをチェック  
     private bool isMenuOpen = false;
     // 最後に選択されていたメインメニューのボタンを保存する変数
@@ -53,6 +57,7 @@ public class MenuManager : MonoBehaviour
         if(itemListPanel != null ) itemListPanel.SetActive( false );
         if(statusPanel != null ) statusPanel.SetActive( false );
         if(equipmentPanel != null ) equipmentPanel.SetActive( false );
+        if(abilityPanel != null ) abilityPanel.SetActive( false );
     }
     // Update is called once per frame
     void Update()
@@ -108,6 +113,12 @@ public class MenuManager : MonoBehaviour
     private bool CanOpenMenu()
     {
         if(GameManager.Instance.IsSceneTransitioning) return false;
+
+        if(GameManager.Instance.Player != null &&
+           GameManager.Instance.Player.IsMovementInputHeld)
+        {
+            return false;
+        }
 
         return GameManager.Instance.CurrentState == GameState.Exploring
             || GameManager.Instance.CurrentState == GameState.Menu;
@@ -185,6 +196,11 @@ public class MenuManager : MonoBehaviour
         SetMenuState(MenuState.Equipment);
     }
 
+    public void OpenAbilityMenu()
+    {
+        SetMenuState(MenuState.Ability);
+    }
+
     public void CloseMenu()
     {
         isMenuOpen = false;
@@ -207,6 +223,7 @@ public class MenuManager : MonoBehaviour
         if(itemListPanel != null) itemListPanel.SetActive(false);
         if(statusPanel != null) statusPanel.SetActive(false);
         if(equipmentPanel != null) equipmentPanel.SetActive(false);
+        if(abilityPanel != null) abilityPanel.SetActive(false);
 
         switch (state)
         {
@@ -235,6 +252,16 @@ public class MenuManager : MonoBehaviour
 
             case MenuState.Equipment:
                 if(equipmentPanel != null) equipmentPanel.SetActive(true);
+                break;
+
+            case MenuState.Ability:
+                if (abilityPanel != null) abilityPanel.SetActive(true);
+
+                if(AbilityUI.Instance != null)
+                {
+                    AbilityUI.Instance.Open();
+                }
+
                 break;
         }
     }

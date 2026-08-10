@@ -27,6 +27,8 @@ public class SellShopUI : MonoBehaviour
     [SerializeField] private GameObject cannotSellTextRoot;
     [SerializeField] private GameObject equippedLockTextRoot;
 
+    [SerializeField] private Image itemIcon;
+
     [SerializeField] private Image rankImage;
     [SerializeField] private RarityIconDatabase rarityDB;
 
@@ -294,6 +296,12 @@ public class SellShopUI : MonoBehaviour
         if(rankImage != null && rarityDB != null)
         {
             rankImage.sprite = rarityDB.GetIcon(item.itemData.rarity);
+        }
+
+        if(itemIcon != null)
+        {
+            itemIcon.sprite = item.itemData.icon;
+            itemIcon.enabled = item.itemData.icon != null;
         }
     }
 
