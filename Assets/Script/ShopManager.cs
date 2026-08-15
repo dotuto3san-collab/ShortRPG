@@ -38,6 +38,33 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Image itemIcon;
     [SerializeField] TextMeshProUGUI itemDescription;
 
+    [Header("商品情報パネル")]
+    [SerializeField] private GameObject normalItemPanel;
+    [SerializeField] private GameObject equipmentItemPanel;
+
+    [Header("商品フォーカス情報")]
+    [SerializeField] private TextMeshProUGUI selectedItemNameText;
+    [SerializeField] private TextMeshProUGUI selectedItemEffectText;
+
+    [Header("通常アイテムパネル - プレイヤー情報")]
+    [SerializeField] private TextMeshProUGUI playerNameText;
+    [SerializeField] private TextMeshProUGUI playerHPText;
+    [SerializeField] private Slider playerHPBar;
+
+    [Header("装備アイテムパネル - 現在のステータス")]
+    [SerializeField] private TextMeshProUGUI equipmentAttackText;
+    [SerializeField] private TextMeshProUGUI equipmentDefenseText;
+    [SerializeField] private TextMeshProUGUI equipmentChargeText;
+
+    [Header("装備アイテムパネル - 現在の装備")]
+    [SerializeField] private TextMeshProUGUI currentWeaponText;
+    [SerializeField] private TextMeshProUGUI currentArmorText;
+
+    [Header("装備アイテムパネル - 装備後ステータス")]
+    [SerializeField] private TextMeshProUGUI previewAttackText;
+    [SerializeField] private TextMeshProUGUI previewDefenseText;
+    [SerializeField] private TextMeshProUGUI previewChargeText;
+
     [SerializeField] private Image rankImage;
     [SerializeField] private RarityIconDatabase rarityDB;
 
@@ -45,8 +72,6 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI itemSelectionGoldText;
     [SerializeField] private TMPro.TextMeshProUGUI boughtGoldText;
     [SerializeField] private TMPro.TextMeshProUGUI totalPriceText;
-
-    
 
     private int currentAmount = 1;
     private int maxAmount = 1;
@@ -81,7 +106,18 @@ public class ShopManager : MonoBehaviour
         {
             sellShopUI.Close();
         }
+
+        if(normalItemPanel != null)
+        {
+            normalItemPanel.SetActive(false);
+        }
+
+        if(equipmentItemPanel != null)
+        {
+            equipmentItemPanel.SetActive(false);
+        }
     }
+
     public void OpenShop(List<ItemData>inventory)
     {
         currentShopInventory = inventory;
@@ -351,12 +387,18 @@ public class ShopManager : MonoBehaviour
 
         StartCoroutine(SetupNavigationNextFrame());
 
-        if(firstButton != null)
+        if(firstButton != null && EventSystem.current != null)
         {
+            EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(firstButton);
-        }
 
-        
+            var firstSlot = firstButton.GetComponent<ItemSlot>();
+
+            if(firstSlot != null)
+            {
+                firstSlot.ShowFocus();
+            }
+        }
     }
 
     private IEnumerator SetupNavigationNextFrame()
@@ -413,6 +455,193 @@ public class ShopManager : MonoBehaviour
     public void SetSelectedItem(ItemData data)
     {
         SelectedItem = data;
+    }
+
+    public void OnItemFocused(ItemData data)
+    {
+        if(data == null)
+        {
+            return;
+        }
+
+        SelectedItem = data;
+
+        if(selectedItemNameText != null)
+        {
+            selectedItemNameText.text = data.itemName;
+        }
+
+        if(selectedItemEffectText != null)
+        {
+            selectedItemEffectText.text = data.effectText;
+        }
+
+        bool isEquipment =
+            data.equipData != null &&
+            data.equipData.equipType != EquipData.EquipType.None;
+
+        if (!isEquipment)
+        {
+            if(normalItemPanel != null)
+            {
+                normalItemPanel.SetActive(true);
+            }
+
+            if(equipmentItemPanel != null)
+            {
+                equipmentItemPanel.SetActive(false);
+            }
+
+            UpdateNormalItemPlayerStatus();
+
+            return;
+        }
+
+        if(normalItemPanel != null)
+        {
+            normalItemPanel.SetActive(false);
+        }
+
+        if(equipmentItemPanel != null)
+        {
+            equipmentItemPanel.SetActive(true);
+        }
+
+        UpdateEquipmentItemStatus(data);
+    }
+
+    private void UpdateNormalItemPlayerStatus()
+    {
+        if(PlayerStatus.Instance == null)
+        {
+            Debug.LogWarning("ShopManager: PlayerStatus.Instance が存在しません");
+            return;
+        }
+
+        if(playerNameText != null)
+        {
+            playerNameText.text = PlayerStatus.Instance.GetPlayerName();
+        }
+
+        int currentHP = PlayerStatus.Instance.currentHP;
+        int maxHP = PlayerStatus.Instance.maxHP;
+
+        if(playerHPText != null)
+        {
+            playerHPText.text = $"{currentHP} / {maxHP}";
+        }
+
+        if(playerHPBar != null)
+        {
+            playerHPBar.maxValue = maxHP;
+            playerHPBar.value = currentHP;
+        }
+    }
+
+    private void UpdateEquipmentItemStatus(ItemData previewItem)
+    {
+        if(PlayerStatus.Instance == null)
+        {
+            Debug.LogWarning("ShopManager: PlayerStatus.Instance が存在しません");
+            return;
+        }
+
+        if(EquipmentManager.Instance == null)
+        {
+            Debug.LogWarning("ShopManager: EquipmentManager.Instance が存在しません");
+            return;
+        }
+
+        int currentAttack = PlayerStatus.Instance.Attack;
+        int currentDefense = PlayerStatus.Instance.Defense;
+        int currentCharge = PlayerStatus.Instance.Charge;
+
+        if(equipmentAttackText != null)
+        {
+            equipmentAttackText.text = currentAttack.ToString();
+        }
+
+        if(equipmentDefenseText != null)
+        {
+            equipmentDefenseText.text = currentDefense.ToString();
+        }
+
+        if(equipmentChargeText != null)
+        {
+            equipmentChargeText.text = currentCharge.ToString();
+        }
+
+        ItemData currentWeapon =
+            EquipmentManager.Instance.GetEquipped(EquipData.EquipType.Weapon);
+
+        if(currentWeaponText != null)
+        {
+            currentWeaponText.text =
+                currentWeapon != null
+                    ? currentWeapon.itemName
+                    : "素手";
+        }
+
+        ItemData currentArmor =
+            EquipmentManager.Instance.GetEquipped(EquipData.EquipType.Armor);
+
+        if(currentArmorText != null)
+        {
+            currentArmorText.text =
+                currentArmor != null
+                    ? currentArmor.itemName
+                    : "普段着";
+        }
+
+        var previewBonus =
+            EquipmentManager.Instance.CaluculatePreviewStats(previewItem);
+
+        var previewStatus =
+            PlayerStatus.Instance.GetPreviewTotalStats(
+                previewBonus.atk,
+                previewBonus.def,
+                previewBonus.chg
+            );
+
+        if(previewAttackText != null)
+        {
+            int diff = previewStatus.atk - currentAttack;
+
+            previewAttackText.text = previewStatus.atk.ToString();
+            previewAttackText.color = GetDiffColor(diff);
+        }
+
+        if(previewDefenseText != null)
+        {
+            int diff = previewStatus.def - currentDefense;
+
+            previewDefenseText.text = previewStatus.def.ToString();
+            previewDefenseText.color = GetDiffColor(diff);
+        }
+
+        if(previewChargeText != null)
+        {
+            int diff = previewStatus.chg - currentCharge;
+
+            previewChargeText.text = previewStatus.chg.ToString();
+            previewChargeText.color = GetDiffColor(diff);
+        }
+    }
+
+    private Color GetDiffColor(int diff)
+    {
+        if(diff > 0)
+        {
+            return Color.yellow;
+        }
+        else if(diff < 0)
+        {
+            return Color.red;
+        }
+        else
+        {
+            return Color.white;
+        }
     }
 
     void SetItemSelectionNavigetion(bool enable)
@@ -500,6 +729,18 @@ public class ShopManager : MonoBehaviour
         {
             EventSystem.current.SetSelectedGameObject(null);
         }
+
+        if(selectedItemNameText != null)
+        {
+            selectedItemNameText.text = "";
+        }
+
+        if(selectedItemEffectText != null)
+        {
+            selectedItemEffectText.text = "";
+        }
+
+        SelectedItem = null;
 
         CurrentState = ShopState.ActionSelect;
 

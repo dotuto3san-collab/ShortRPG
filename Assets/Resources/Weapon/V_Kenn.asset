@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
-  m_Name: Tue
+  m_Name: V_Kenn
   m_EditorClassIdentifier: 
-  itemId: 003
-  itemName: "\u9244\u306E\u6756"
-  effectText: 
-  description: 
-  icon: {fileID: 0}
+  itemId: 102
+  itemName: "\u5263"
+  effectText: "\u653B\u6483\u529B + 99"
+  description: "\u3042\u307E\u308A\u306E\u3082\u5F37\u529B\u306A\u529B\u3092\u6301\u3061\u3059\u304E\u3066\u3057\u307E\u3063\u305F\u7D50\u679C\u3001\u673D\u3061\u3066\u3057\u307E\u3063\u305F\u54C0\u308C\u306A\u5263\u3002\u3057\u304B\u3057\u3001\u4F7F\u7528\u8005\u6B21\u7B2C\u3067\u306F\u547D\u3092\u673D\u3061\u3055\u305B\u308B\u3068\u304B"
+  icon: {fileID: 1527982509, guid: fbb32d68ada2b404da721d59a3327bdb, type: 3}
   buyPrice: 0
   sellPrice: 0
   canSell: 1
@@ -24,8 +24,8 @@ MonoBehaviour:
   canUseInField: 0
   useEffect: {fileID: 0}
   equipData:
-    attackPower: 0
+    attackPower: 99
     defensePower: 0
     chargePower: 0
     equipType: 1
-  rarity: 1
+  rarity: 7

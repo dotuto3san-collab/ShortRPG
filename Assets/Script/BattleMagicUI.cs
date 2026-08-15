@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -12,7 +13,12 @@ public class BattleMagicUI : MonoBehaviour
     [SerializeField] private Transform content;
     [SerializeField] private GameObject magicButtonPrefab;
 
+    [Header("ñÇñ@å¯â ")]
+    [SerializeField] private TextMeshProUGUI magicEffectText;
+
     List<Button> buttons = new List<Button>();
+
+    private int lastSelectedMagicIndex = 0;
 
     void Awake()
     {
@@ -23,6 +29,12 @@ public class BattleMagicUI : MonoBehaviour
     public void Show()
     {
         root.SetActive(true);
+
+        if (magicEffectText != null)
+        {
+            magicEffectText.text = "";
+        }
+
         Refresh();
     }
 
@@ -33,9 +45,9 @@ public class BattleMagicUI : MonoBehaviour
 
     void Update()
     {
-        if(!root.activeSelf) return;
+        if (!root.activeSelf) return;
 
-        if(Input.GetKeyDown(KeyCode.X) ||
+        if (Input.GetKeyDown(KeyCode.X) ||
            Input.GetKeyDown(KeyCode.LeftShift) ||
            Input.GetKeyDown(KeyCode.RightShift))
         {
@@ -57,7 +69,7 @@ public class BattleMagicUI : MonoBehaviour
     {
         buttons.Clear();
 
-        foreach(Transform child in content)
+        foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
@@ -66,14 +78,16 @@ public class BattleMagicUI : MonoBehaviour
 
         var magics = PlayerStatus.Instance.GetLearnedMagics();
 
+        int magicIndex = 0;
+
         foreach (var magic in magics)
         {
-            if(magic == null) continue;
+            if (magic == null) continue;
 
             GameObject obj = Instantiate(magicButtonPrefab, content);
 
             var ui = obj.GetComponent<BattleMagicButtonUI>();
-            ui.Setup(magic, this);
+            ui.Setup(magic, this, magicIndex);
 
             var btn = obj.GetComponent<Button>();
             buttons.Add(btn);
@@ -82,16 +96,18 @@ public class BattleMagicUI : MonoBehaviour
             nav.mode = Navigation.Mode.Explicit;
             btn.navigation = nav;
 
-            if(firstButton == null)
+            if (firstButton == null)
             {
                 firstButton = obj;
             }
+
+            magicIndex++;
         }
 
         int colume = 3;
         int count = buttons.Count;
 
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             Navigation nav = new Navigation();
             nav.mode = Navigation.Mode.Explicit;
@@ -109,19 +125,19 @@ public class BattleMagicUI : MonoBehaviour
             if (left < rowStart) left = rowEnd;
 
             int down = i + colume;
-            if(down >= count)
+            if (down >= count)
             {
                 down = col;
                 if (down >= count) down = i;
             }
 
             int up = i - colume;
-            if(up < 0)
+            if (up < 0)
             {
                 int lastRowStart = ((count - 1) / colume) * colume;
                 int candidate = lastRowStart + col;
 
-                while(candidate >= count && candidate >= col)
+                while (candidate >= count && candidate >= col)
                 {
                     candidate -= colume;
                 }
@@ -136,17 +152,48 @@ public class BattleMagicUI : MonoBehaviour
             buttons[i].navigation = nav;
         }
 
-        if(firstButton != null && EventSystem.current != null)
+        if (EventSystem.current != null && buttons.Count > 0)
         {
+            if (lastSelectedMagicIndex < 0 ||
+               lastSelectedMagicIndex >= buttons.Count)
+            {
+                lastSelectedMagicIndex = 0;
+            }
+
+            GameObject target = buttons[lastSelectedMagicIndex].gameObject;
+
             EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(firstButton);
+            EventSystem.current.SetSelectedGameObject(target);
+
+            var magicButton =
+                target.GetComponent<BattleMagicButtonUI>();
+
+            if (magicButton != null)
+            {
+                magicButton.ShowFocus();
+            }
+        }
+    }
+
+    public void OnMagicFocused(MagicData magic, int index)
+    {
+        if (magic == null)
+        {
+            return;
+        }
+
+        lastSelectedMagicIndex = index;
+
+        if (magicEffectText != null)
+        {
+            magicEffectText.text = magic.effectText;
         }
     }
 
     public void OnMagicSelected(MagicData magic)
     {
 
-        if(magic == null)
+        if (magic == null)
         {
             Debug.LogError("Magic is null.");
             return;
@@ -170,7 +217,7 @@ public class BattleMagicUI : MonoBehaviour
                 BattleManager.Instance.SetTarget(null);
                 BattleManager.Instance.SetCommand(new MagicCommand(magic));
 
-                if(BattleHelpLog.Instance != null)
+                if (BattleHelpLog.Instance != null)
                 {
                     BattleHelpLog.Instance.Hide();
                 }
@@ -192,7 +239,7 @@ public class BattleMagicUI : MonoBehaviour
     {
         Hide();
 
-        if(BattleHelpLog.Instance != null)
+        if (BattleHelpLog.Instance != null)
         {
             BattleHelpLog.Instance.Hide();
         }
@@ -200,7 +247,9 @@ public class BattleMagicUI : MonoBehaviour
         BattleTargetUI.Instance.SetMagic(magic);
         BattleTargetUI.Instance.Show();
 
-        yield return BattleLogUI.Instance.ShowLogAndWait("ëŒè€ÇÃìGÇëIëÇµÇƒÇ≠ÇæÇ≥Ç¢");
+        BattleLogUI.Instance.ShowImmediate("ëŒè€ÇÃìGÇëIëÇµÇƒÇ≠ÇæÇ≥Ç¢");
+
+        yield break;
     }
 
     private System.Collections.IEnumerator SelectEnemyTarget(ItemData item)

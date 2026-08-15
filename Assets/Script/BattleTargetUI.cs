@@ -41,6 +41,9 @@ public class BattleTargetUI : MonoBehaviour
     {
         pendingItem = item;
         isFromItem = true;
+
+        pendingMagic = null;
+        isFromMagic = false;
     }
 
     public void Show()
@@ -128,12 +131,18 @@ public class BattleTargetUI : MonoBehaviour
     {
         pendingItem = null;
         isFromItem = false;
+
+        pendingMagic = null;
+        isFromMagic = false;
     }
 
     public void SetMagic(MagicData magic)
     {
         pendingMagic = magic;
         isFromMagic= true;
+
+        pendingItem = null;
+        isFromItem = false;
     }
 
     void Update()
@@ -211,20 +220,29 @@ public class BattleTargetUI : MonoBehaviour
 
     void OnCancel()
     {
+        bool returnToItem = isFromItem;
+        bool returnToMagic = isFromMagic;
+
         Hide();
 
-        if (isFromItem)
+        if (returnToItem)
         {
-            BattleItemUI.Instance.Show();
+            if (BattleItemUI.Instance != null)
+            {
+                BattleItemUI.Instance.Show();
+            }
 
             if(BattleHelpLog.Instance != null)
             {
                 BattleHelpLog.Instance.Show("アイテムを選択してください");
             }
         }
-        else if (isFromMagic)
+        else if (returnToMagic)
         {
-            BattleMagicUI.Instance.Show();
+            if (BattleItemUI.Instance != null)
+            {
+                BattleMagicUI.Instance.Show();
+            }
 
             if(BattleMagicUI.Instance != null)
             {
@@ -233,7 +251,10 @@ public class BattleTargetUI : MonoBehaviour
         }
         else
         {
-            BattleCommandUI.Instance.Show();
+            if (BattleCommandUI.Instance != null)
+            {
+                BattleCommandUI.Instance.Show();
+            }
         }
     }
 

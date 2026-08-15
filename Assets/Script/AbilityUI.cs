@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 public class AbilityUI : MonoBehaviour
 {
@@ -29,6 +31,10 @@ public class AbilityUI : MonoBehaviour
     [SerializeField] private Transform magicContent;
     [SerializeField] private GameObject magicButtonPrefab;
 
+    [Header("–‚–@à–¾")]
+    [SerializeField] private TextMeshProUGUI magicEffectText;
+    [SerializeField] private TextMeshProUGUI magicDescriptionText;
+
     [Header("Å‰‚É‘I‘ð‚·‚éUI")]
     [SerializeField] private GameObject firstSelectedObject;
 
@@ -36,6 +42,7 @@ public class AbilityUI : MonoBehaviour
     [SerializeField] private GameObject magicCannotUseMessage;
 
     private AbilityState currentState;
+    private Coroutine magicMessageCoroutine;
 
     public AbilityState CurrentState => currentState;
 
@@ -303,12 +310,64 @@ public class AbilityUI : MonoBehaviour
         }
     }
 
+    public void OnMagicSelected(MagicData magic)
+    {
+        if(magic == null)
+        {
+            Debug.LogError("Magic is null");
+            return;
+        }
+
+        ShowMagicCannotUseMessage();
+    }
+
+    public void OnMagicFocused(MagicData magic)
+    {
+        if(magic == null)
+        {
+            return;
+        }
+
+        if(magicEffectText != null)
+        {
+            magicEffectText.text = magic.effectText;
+        }
+
+        if(magicDescriptionText != null)
+        {
+            magicDescriptionText.text = magic.description;
+        }
+    }
+
     private void ShowMagicCannotUseMessage()
     {
-        if (magicCannotUseMessage != null)
+        if (magicCannotUseMessage == null)
         {
-            magicCannotUseMessage.SetActive(true);
+            return;
         }
+
+        if (magicMessageCoroutine != null)
+        {
+            StopCoroutine(magicMessageCoroutine);
+            magicMessageCoroutine = null;
+        }
+
+        magicCannotUseMessage.SetActive(true);
+
+        magicMessageCoroutine =
+            StartCoroutine(HideMagicCannotUseMessageAfterDelay());
+    }
+
+    private IEnumerator HideMagicCannotUseMessageAfterDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        if(magicCannotUseMessage != null)
+        {
+            magicCannotUseMessage.SetActive(false);
+        }
+
+        magicMessageCoroutine = null;
     }
 
     private void HandleCancelInput()

@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
-  m_Name: DounoTue
+  m_Name: TetsunoHuku
   m_EditorClassIdentifier: 
-  itemId: 002
-  itemName: "\u9285\u306E\u6756"
-  effectText: 
-  description: "\u4E00\u822C\u7684\u306A\u6756\u3001\u653B\u6483+5"
+  itemId: 34
+  itemName: "\u9244\u306E\u670D"
+  effectText: "\u9632\u5FA1\u529B + 10"
+  description: "\u306A\u3093\u3068\u9244\u3067\u3067\u304D\u3066\u3044\u308B\u670D\u3002\u93A7\u3067\u306F\u306A\u304F\u670D\u306A\u306E\u3067\u52D5\u304D\u3084\u3059\u3055\u306F\u629C\u7FA4\u3060\u3002"
   icon: {fileID: 0}
-  buyPrice: 250
-  sellPrice: 100
+  buyPrice: 0
+  sellPrice: 0
   canSell: 1
   canUseInBattle: 0
   canUseInField: 0
   useEffect: {fileID: 0}
   equipData:
-    attackPower: 10
-    defensePower: 0
+    attackPower: 0
+    defensePower: 10
     chargePower: 0
-    equipType: 1
-  rarity: 2
+    equipType: 2
+  rarity: 1

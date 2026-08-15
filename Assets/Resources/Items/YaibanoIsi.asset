@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 31
   itemName: "\u5203\u306E\u77F3"
-  description: "\u6575\u306B50\u30C0\u30E1\u30FC\u30B8\n\u5305\u4E01\u306E\u3088\u3046\u306B\u5207\u308C\u308B\u77F3\u3002\u592A\u53E4\u306E\u6614\u306F\u6B66\u5668\u306B\u4F7F\u308F\u308C\u3066\u3044\u305F\u3068\u304B\u3002"
+  effectText: "\u6575\u306B50\u30C0\u30E1\u30FC\u30B8"
+  description: "\u5305\u4E01\u306E\u3088\u3046\u306B\u5207\u308C\u308B\u77F3\u3002\u592A\u53E4\u306E\u6614\u306F\u6B66\u5668\u306B\u4F7F\u308F\u308C\u3066\u3044\u305F\u3068\u304B\u3002"
   icon: {fileID: 0}
   buyPrice: 50
   sellPrice: 25
@@ -24,5 +25,7 @@ MonoBehaviour:
   useEffect: {fileID: 11400000, guid: d0220c4b764f3634191932e8bcc64bd8, type: 2}
   equipData:
     attackPower: 0
+    defensePower: 0
+    chargePower: 0
     equipType: 0
   rarity: 1

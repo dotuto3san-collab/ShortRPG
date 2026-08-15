@@ -1,14 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
-public class BattleItemButtonUI : MonoBehaviour
+public class BattleItemButtonUI : MonoBehaviour, ISelectHandler
 {
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI amountText;
 
     private InventoryItem item;
     private BattleItemUI parent;
+
+    public ItemData ItemData => item?.itemData;
 
     public void Setup(InventoryItem item, BattleItemUI parent)
     {
@@ -24,8 +27,48 @@ public class BattleItemButtonUI : MonoBehaviour
         button.onClick.AddListener(OnClick);
     }
 
+    public void ShowFocus()
+    {
+        if(item == null)
+        {
+            return;
+        }
+
+        if(parent != null)
+        {
+            parent.OnItemFocused(
+                item.itemData,
+                transform.GetSiblingIndex()
+            );
+        }
+    }
+
+    public void OnSelect(BaseEventData eventData)
+    {
+        if(item == null)
+        {
+            return;
+        }
+
+        if(parent != null)
+        {
+            parent.OnItemFocused(
+                item.itemData,
+                transform.GetSiblingIndex()
+            );
+        }
+    }
+
     private void OnClick()
     {
-        parent.OnItemSelected(item.itemData);
+        if(item == null)
+        {
+            return;
+        }
+
+        if(parent != null)
+        {
+            parent.OnItemSelected(item.itemData);
+        }
     }
 }

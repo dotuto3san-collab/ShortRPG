@@ -21,11 +21,30 @@ public class ItemSlot : MonoBehaviour,ISelectHandler,ISubmitHandler
         if (priceText != null) priceText.text = data.buyPrice.ToString();
         if(iconImage != null && data.icon != null) iconImage.sprite = data.icon;
     }
-    public void OnSelect(BaseEventData eventData)
+
+    public void ShowFocus()
     {
+        if(itemData == null)
+        {
+            return;
+        }
+
         if(ShopManager.Instance != null)
         {
-            ShopManager.Instance.SetSelectedItem(itemData);
+            ShopManager.Instance.OnItemFocused(itemData);
+        }
+    }
+
+    public void OnSelect(BaseEventData eventData)
+    {
+        if(itemData == null)
+        {
+            return;
+        }
+
+        if(ShopManager.Instance != null)
+        {
+            ShopManager.Instance.OnItemFocused(itemData);
         }
     }
 

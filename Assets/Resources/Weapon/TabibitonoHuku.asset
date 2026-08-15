@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
-  m_Name: HurubitaTue
+  m_Name: TabibitonoHuku
   m_EditorClassIdentifier: 
-  itemId: 001
-  itemName: "\u53E4\u3073\u305F\u6756"
-  effectText: 
-  description: "\u30DC\u30ED\u30DC\u30ED\u306E\u6756"
+  itemId: 33
+  itemName: "\u65C5\u4EBA\u306E\u670D"
+  effectText: "\u9632\u5FA1\u529B + 10"
+  description: "\u4E3B\u4EBA\u516C\u304C\u65C5\u3067\u305A\u3063\u3068\u7740\u3066\u3044\u308B\u666E\u901A\u306E\u670D\u3002\u7279\u5225\u306A\u6709\u540D\u4EBA\u306E\u670D\u3068\u304B\u3067\u306F\u306A\u3044\u305F\u3081\u6700\u4F4E\u30E9\u30F3\u30AF\u3060\u308D\u3046\u3002"
   icon: {fileID: 0}
   buyPrice: 0
-  sellPrice: 1
+  sellPrice: 0
   canSell: 0
   canUseInBattle: 0
   canUseInField: 0
   useEffect: {fileID: 0}
   equipData:
-    attackPower: 5
-    defensePower: 0
+    attackPower: 0
+    defensePower: 9
     chargePower: 0
-    equipType: 1
+    equipType: 2
   rarity: 0

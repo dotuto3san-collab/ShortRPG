@@ -156,11 +156,6 @@ public class BattleCommandUI : MonoBehaviour
 
         BattleMagicUI.Instance.Show();
 
-        if(BattleHelpLog.Instance != null)
-        {
-            BattleHelpLog.Instance.Show("魔法を選択してください");
-        }
-
         yield break;
     }
 
@@ -175,7 +170,6 @@ public class BattleCommandUI : MonoBehaviour
 
         BattleItemUI.Instance.Show();
 
-        BattleHelpLog.Instance.SetMessage("アイテムを選択してください");
         yield break;
     }
 

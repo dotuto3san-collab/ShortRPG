@@ -18,6 +18,12 @@ public enum MagicTargetType
 public class MagicData : ScriptableObject
 {
     public string magicName;
+
+    [TextArea(2, 4)]
+    public string effectText;
+    [TextArea(3, 6)]
+    public string description;
+
     public MagicType type;
     public MagicTargetType targetType;
     public int power;
