@@ -5,6 +5,12 @@ using TMPro;
 public class MenuStatusUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI expText;
+
+    [Header("キャラクター表示")]
+    [SerializeField] private Image characterIcon;
+
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private TextMeshProUGUI chargeText;
@@ -12,6 +18,9 @@ public class MenuStatusUI : MonoBehaviour
     [Header("HP表示")]
     [SerializeField] private TextMeshProUGUI hpText;
     [SerializeField] private Slider hpBar;
+
+    [Header("EXP表示")]
+    [SerializeField] private Slider expBar;
 
     void Start()
     {
@@ -46,12 +55,30 @@ public class MenuStatusUI : MonoBehaviour
             return;
         }
 
+        var ps = PlayerStatus.Instance;
+
         int current = PlayerStatus.Instance.currentHP;
         int max = PlayerStatus.Instance.maxHP;
 
         if(nameText != null)
         {
             nameText.text = PlayerStatus.Instance.GetPlayerName();
+        }
+
+        if(characterIcon != null)
+        {
+            characterIcon.sprite = ps.GetPlayerIcon();
+        }
+
+        if(levelText != null)
+        {
+            levelText.text = $"{ps.GetLevel()}";
+        }
+
+        if(expText != null)
+        {
+            expText.text =
+                $"{ps.GetCurrentExp()} / {ps.GetRequiredExp()}";
         }
 
         if(hpText != null)
@@ -65,24 +92,29 @@ public class MenuStatusUI : MonoBehaviour
             hpBar.value = current;
         }
 
-        if(PlayerStatus.Instance != null)
+        if(expBar != null)
         {
-            var ps = PlayerStatus.Instance;
+            int currentExp = ps.GetCurrentExp();
+            int requiredExp = ps.GetRequiredExp();
 
-            if(attackText != null)
-            {
-                attackText.text = ps.Attack.ToString();
-            }
-
-            if(defenseText != null)
-            {
-                defenseText.text = ps.Defense.ToString();
-            }
-
-            if(chargeText != null)
-            {
-                chargeText.text = ps.Charge.ToString();
-            }
+            expBar.maxValue = requiredExp;
+            expBar.value = currentExp;
         }
+
+        if(attackText != null)
+        {
+            attackText.text = ps.Attack.ToString();
+        }
+
+        if(defenseText != null)
+        {
+            defenseText.text = ps.Defense.ToString();
+        }
+
+        if(chargeText != null)
+        {
+            chargeText.text = ps.Charge.ToString();
+        }
+    
     }
 }

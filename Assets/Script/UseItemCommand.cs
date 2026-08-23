@@ -18,7 +18,7 @@ public class UseItemCommand : IBattleCommand
             yield break;
         }
 
-        yield return BattleLogUI.Instance.ShowLogAndWait($"{user.data.unitName}‚Í{item.itemName}‚ðŽg‚Á‚½!");
+        yield return BattleLogUI.Instance.ShowLogAndWait($"{user.GetUnitName()}‚Í{item.itemName}‚ðŽg‚Á‚½!");
 
         if(item.useEffect == null)
         {

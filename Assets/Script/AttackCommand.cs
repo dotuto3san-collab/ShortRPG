@@ -7,7 +7,7 @@ public class AttackCommand : IBattleCommand
     {
         if (target == null) yield break;
         
-        bool isAwaken = Random.value < 0.9f;
+        bool isAwaken = Random.value < 0.05f;
 
         if (isAwaken && !user.IsAwaken())
         {
@@ -17,7 +17,7 @@ public class AttackCommand : IBattleCommand
             yield return BattleLogUI.Instance.ShowLogAndWait($"{user.GetUnitName()}‚Í‚©‚Â‚Ä‚Ì—Í‚ðŽæ‚è–ß‚µ‚½I");
         }
 
-        yield return BattleLogUI.Instance.ShowLogAndWait($"{user.data.unitName}‚ÌUŒ‚I");
+        yield return BattleLogUI.Instance.ShowLogAndWait($"{user.GetUnitName()}‚ÌUŒ‚I");
 
         yield return new WaitForSeconds(0.3f);
 

@@ -7,6 +7,7 @@ public class PlayerStatus : MonoBehaviour
 
     [Header("基本情報")]
     [SerializeField] private string playerName = "プレイヤー";
+    [SerializeField] private Sprite playerIcon;
 
     [Header("ステータス")]
     public int maxHP = 100;
@@ -41,6 +42,11 @@ public class PlayerStatus : MonoBehaviour
     public string GetPlayerName()
     {
         return playerName;
+    }
+
+    public Sprite GetPlayerIcon()
+    {
+        return playerIcon;
     }
 
     public int GetLevel() => currentLevel;
@@ -116,10 +122,31 @@ public class PlayerStatus : MonoBehaviour
         {
             foreach(var skill in data.unlockSkills)
             {
-                if(skill != null && !learnedSkills.Contains(skill))
+                if(skill == null)
+                {
+                    continue;
+                }
+                
+                if(!learnedSkills.Contains(skill))
                 {
                     learnedSkills.Add(skill);
-                    EquipSkill(skill);
+                }
+            }
+
+            foreach(var skill in learnedSkills)
+            {
+                if(skill == null)
+                {
+                    continue;
+                }
+
+                if (!equippedSkills.ContainsKey(skill.slotType))
+                {
+                    equippedSkills[skill.slotType] = skill;
+
+                    Debug.Log(
+                        $"[PlayerStatus] 初期スキル装備: " +
+                        $"{skill.slotType} → {skill.skillName}");
                 }
             }
         }
@@ -184,6 +211,7 @@ public class PlayerStatus : MonoBehaviour
         while(true)
         {
             var data = levelTable.GetLevelData(currentLevel);
+
             if(data == null) break;
 
             if (currentExp < data.requiredExp) break;
@@ -194,6 +222,8 @@ public class PlayerStatus : MonoBehaviour
 
             OnLevelUp(currentLevel);
         }
+
+        OnStatusChanged?.Invoke();
 
         return levelUpCount;
     }
@@ -242,5 +272,22 @@ public class PlayerStatus : MonoBehaviour
         Debug.Log($"スキル装備:{slot}に{skill.name}");
 
         Debug.Log($"[EquipSkill] {skill.name} → slot:{slot}");
+    }
+
+    public void SetEquippedSkill(SkillData skill)
+    {
+        if (skill == null)
+        {
+            Debug.LogError("[PlayerStatus] 装備しようとしたスキルがnullです");
+            return;
+        }
+
+        equippedSkills[skill.slotType] = skill;
+
+        Debug.Log(
+            $"[PlayerStatus スキル装備変更: " +
+            $"{skill.slotType} → {skill.skillName}");
+
+        OnStatusChanged?.Invoke();
     }
 }

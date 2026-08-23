@@ -244,25 +244,16 @@ public class BattleMagicUI : MonoBehaviour
             BattleHelpLog.Instance.Hide();
         }
 
+        if(BattleTargetUI.Instance == null)
+        {
+            Debug.LogError("BattleMagicUI: BattleTargetUI‚ª‘¶İ‚µ‚Ü‚¹‚ñ");
+            yield break;
+        }
+
         BattleTargetUI.Instance.SetMagic(magic);
         BattleTargetUI.Instance.Show();
 
         BattleLogUI.Instance.ShowImmediate("‘ÎÛ‚Ì“G‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢");
-
-        yield break;
-    }
-
-    private System.Collections.IEnumerator SelectEnemyTarget(ItemData item)
-    {
-        Hide();
-
-        BattleTargetUI.Instance.Show();
-
-        yield return BattleLogUI.Instance.ShowLogAndWait("‘ÎÛ‚Ì“G‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢");
-
-        yield return new WaitUntil(() => BattleManager.Instance != null
-            && BattleManager.Instance.enemies != null
-            && BattleManager.Instance.player != null);
 
         yield break;
     }

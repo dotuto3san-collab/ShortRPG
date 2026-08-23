@@ -5,20 +5,29 @@ using System.Collections;
 
 public class EquipmentStatusUI : MonoBehaviour
 {
+    [Header("プレイヤー情報")]
     [SerializeField] private TextMeshProUGUI playerNameText;
     [SerializeField] private TextMeshProUGUI playerHPText;
     [SerializeField] private Slider playerHPBar;
 
+    [Header("現在の装備")]
     [SerializeField] private TextMeshProUGUI weaponText;
     [SerializeField] private TextMeshProUGUI armorText;
 
     [SerializeField] private Image weaponIconImage;
     [SerializeField] private Image armorIconImage;
 
+    [Header("選択中の装備")]
+    [SerializeField] private TextMeshProUGUI selectedItemNameText;
+    [SerializeField] private Image selectedItemIconImage;
+    [SerializeField] private TextMeshProUGUI selectedItemEffectText;
+
+    [Header("ステータス")]
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private TextMeshProUGUI chargeText;
 
+    [Header("装備後のステータス")]
     [SerializeField] private TextMeshProUGUI attackPreviewText;
     [SerializeField] private TextMeshProUGUI defensePreviewText;
     [SerializeField] private TextMeshProUGUI chargePreviewText;
@@ -171,9 +180,63 @@ public class EquipmentStatusUI : MonoBehaviour
         }
     }
 
+    public void ShowSelectedItem(ItemData item)
+    {
+        if(item == null)
+        {
+            ClearSelectedItem();
+            return;
+        }
+
+        if(selectedItemNameText != null)
+        {
+            selectedItemNameText.text = item.itemName;
+        }
+
+        if(selectedItemIconImage != null)
+        {
+            if(item.icon != null)
+            {
+                selectedItemIconImage.sprite = item.icon;
+                selectedItemIconImage.enabled = true;
+            }
+            else
+            {
+                selectedItemIconImage.sprite = null;
+                selectedItemIconImage.enabled = false;
+            }
+        }
+
+        if(selectedItemEffectText != null)
+        {
+            selectedItemEffectText.text = item.effectText;
+        }
+    }
+
+    private void ClearSelectedItem()
+    {
+        if(selectedItemNameText != null)
+        {
+            selectedItemNameText.text = "";
+        }
+
+        if(selectedItemIconImage != null)
+        {
+            selectedItemIconImage.sprite = null;
+            selectedItemIconImage.enabled = false;
+        }
+
+        if(selectedItemEffectText != null)
+        {
+            selectedItemEffectText.text = "";
+        }
+    }
+
     public void ShowPreview(ItemData previewItem)
     {
         if (PlayerStatus.Instance == null || EquipmentManager.Instance == null) return;
+
+        ShowSelectedItem(previewItem);
 
         var ps = PlayerStatus.Instance;
 

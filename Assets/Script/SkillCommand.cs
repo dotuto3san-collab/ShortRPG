@@ -5,10 +5,14 @@ using System.Collections.Generic;
 public class SkillCommand : IBattleCommand
 {
     private SkillData skill;
+    private string skillUserName;
 
-    public SkillCommand(SkillData skill)
+    public SkillCommand(
+        SkillData skill,
+        string skillUserName)
     {
         this.skill = skill;
+        this.skillUserName = skillUserName;
     }
 
     public IEnumerator Execute(BattleUnit user, BattleUnit target)
@@ -16,35 +20,47 @@ public class SkillCommand : IBattleCommand
         if (BattleManager.Instance.AreAllEnemiesDead())
             yield break;
 
-        yield return BattleLogUI.Instance.ShowLogAndWait(
-            "スキル発動！"
-            );
+        if (string.IsNullOrEmpty(skillUserName))
+        {
+            Debug.LogError(
+                "SkillCommand: スキル使用者の名前が設定されていません。");
+
+            yield break;
+        }
 
         yield return BattleLogUI.Instance.ShowLogAndWait(
-            $"{user.GetUnitName()}は{skill.skillName}を発動した！"
-            );
+            "スキル発動！"
+        );
+
+        yield return BattleLogUI.Instance.ShowLogAndWait(
+            $"{skillUserName}は{skill.skillName}を発動した！"
+        );
 
         switch (skill.type)
         {
             case SkillType.Heal:
             {
                 int amount = skill.power;
+
                 user.Heal(amount);
 
                 yield return BattleLogUI.Instance.ShowLogAndWait(
                     $"{user.GetUnitName()}は{amount}回復した！"
                 );
+
                 break;
             }
 
             case SkillType.Buff:
             {
                 int amount = skill.power;
+
                 user.AddAttackBuff(amount);
 
                 yield return BattleLogUI.Instance.ShowLogAndWait(
                     $"{user.GetUnitName()}の攻撃力が{amount}上がった!"
-                    );
+                );
+
                 break;
             }
 
@@ -56,14 +72,16 @@ public class SkillCommand : IBattleCommand
 
                 foreach (var enemy in enemies)
                 {
-                    if (enemy == null || enemy.IsDead()) continue;
-                    
+                    if (enemy == null || enemy.IsDead())
+                        continue;
+
                     enemy.TakeDamage(amount);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
                         $"{enemy.GetUnitName()}に{amount}ダメージ！"
                     );
                 }
+
                 break;
             }
         }

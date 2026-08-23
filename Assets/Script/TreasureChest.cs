@@ -15,6 +15,7 @@ public class TreasureChest : MonoBehaviour
     private SpriteRenderer spriteRenderer;
 
     private bool isOpened;
+    private bool isOpening;
 
     void Awake()
     {
@@ -37,20 +38,28 @@ public class TreasureChest : MonoBehaviour
             return;
         }
 
+        if (isOpening)
+        {
+            return;
+        }
+
         StartCoroutine(OpenRoutine());
     }
 
     public IEnumerator OpenRoutine()
     {
-        if (isOpened)
+        if (isOpened || isOpening)
         {
             yield break;
         }
+
+        isOpening = true;
 
         if(itemData == null)
         {
             Debug.LogError(
                 $"TreasureChest: 中身のItemDataが設定されていません。Object = {gameObject.name}");
+            isOpening = false;
             yield break;
         }
 
@@ -58,6 +67,7 @@ public class TreasureChest : MonoBehaviour
         {
             Debug.LogError(
                 $"TreasureChest: itemAmountが不正です。Amount = {itemAmount}");
+            isOpening = false;
             yield break;
         }
         
@@ -79,17 +89,19 @@ public class TreasureChest : MonoBehaviour
             yield return MessageUI.Instance.ShowMessage(
                 $"しかし、これ以上持てないので宝箱に戻した");
 
-            if(spriteRenderer != null && closedSprite != null)
+            if(spriteRenderer != null && halfOpenedSprite != null)
             {
                 spriteRenderer.sprite = halfOpenedSprite;
             }
 
+            isOpening = false;
             yield break;
         }
 
         InventoryManager.Instance.AddItem(itemData, itemAmount);
 
         isOpened = true;
+        isOpening = false;
 
         yield return MessageUI.Instance.ShowMessage(
             $"{itemData.itemName}を{itemAmount}個手に入れた",

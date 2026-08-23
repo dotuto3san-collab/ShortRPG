@@ -120,10 +120,6 @@ public class BattleManager : MonoBehaviour
         selectedCommand = null;
         selectedTarget = null;
 
-        reservedInterruptCount = 0;
-        selectedCommand = null;
-        selectedTarget = null;
-
         skillUseCounts.Clear();
 
         currentSpecialGauge = maxSpecialGauge;
@@ -132,8 +128,6 @@ public class BattleManager : MonoBehaviour
         {
             SpecialGaugeUI.Instance.SetGauge(currentSpecialGauge,maxSpecialGauge);
         }
-
-        var skills = PlayerStatus.Instance.GetLearnedSkills();
 
         for(int i = 0; i < 4; i++)
         {
@@ -590,28 +584,44 @@ public class BattleManager : MonoBehaviour
 
     void UseSkill(int index)
     {
-        Debug.Log($"UseSkill index:{index}, skillUseCount.ContainsKey:{skillUseCounts.ContainsKey(index)}, Count:{skillUseCounts.Count}");
-        SkillSlotType slot;
+        Debug.Log($"[UseSkill] 仲間スキル index:{index}");
 
-        switch (index)
+        if(CompanionManager.Instance == null)
         {
-            case 0: slot = SkillSlotType.Heal; break;
-            case 1: slot = SkillSlotType.Debuff; break;
-            case 2: slot = SkillSlotType.Buff; break;
-            case 3: slot = SkillSlotType.Utility; break;
-            default: return;
-        }
-
-        var skill = PlayerStatus.Instance.GetSkill(slot);
-        if (skill == null)
-        {
-            Debug.Log($"[UseSkill] slot:{slot}にスキルがない");
+            Debug.LogError("[UseSkill] CompanionManager.Instanceが存在しません");
             return;
         }
 
-        Debug.Log($"[UseSkill 発動: {skill.name}");
+        int companionIndex = index + 1;
 
-        if (!skillUseCounts.ContainsKey(index)) return;
+        CompanionStatus companion =
+            CompanionManager.Instance.GetCompanion(companionIndex);
+        
+        if (companion == null)
+        {
+            Debug.Log($"[UseSkill] 仲間{index + 1}が存在しません");
+            return;
+        }
+
+        SkillData skill = companion.EquippedSkill;
+
+        if(skill == null)
+        {
+            Debug.Log(
+                $"[UseSkill] 仲間{index + 1}に装備スキルがありません");
+
+            return;
+        }
+
+        Debug.Log(
+            $"[UseSkill] 仲間{index + 1} / " +
+            $"スキル:{skill.skillName} / " +
+            $"Type:{skill.type}");
+
+        if (!skillUseCounts.ContainsKey(index))
+        {
+            return;
+        }
 
         if (skillUseCounts[index] >= maxSkillUsesPerUnit)
         {
@@ -638,11 +648,18 @@ public class BattleManager : MonoBehaviour
         {
             if (isPlayerCommandPhase)
             {
-                EnqueueReservedAction(new SkillCommand(skill), null);
+                EnqueueReservedAction(
+                    new SkillCommand(
+                        skill,
+                        companion.Data.companionName),
+                    null);
             }
             else
             {
-                RequestInterrupt(new SkillCommand(skill));
+                RequestInterrupt(
+                    new SkillCommand(
+                        skill,
+                        companion.Data.companionName));
             }
         }
     }
@@ -654,20 +671,28 @@ public class BattleManager : MonoBehaviour
             Debug.Log("ゲージ不足");
             return;
         }
+        
+        var skill = PlayerStatus.Instance.GetSkill(SkillSlotType.Special);
 
         currentSpecialGauge = 0;
         SpecialGaugeUI.Instance?.SetGauge(currentSpecialGauge, maxSpecialGauge);
 
-        var skill = PlayerStatus.Instance.GetSkill(SkillSlotType.Special);
         if(skill == null) return;
 
         if(isPlayerCommandPhase)
         {
-            EnqueueReservedAction(new SkillCommand(skill), null);
+            EnqueueReservedAction(
+                new SkillCommand(
+                    skill,
+                    player.GetUnitName()), 
+                null);
         }
         else
         {
-            RequestInterrupt(new SkillCommand(skill));
+            RequestInterrupt(
+                new SkillCommand(
+                    skill,
+                    player.GetUnitName()));
         }
     }
 

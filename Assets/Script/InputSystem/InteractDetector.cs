@@ -56,6 +56,22 @@ public class InteractDetector : MonoBehaviour
                 // GameManagerで会話モードに変更
                 GameManager.Instance.ChangeState(npc.GetInteractionState());
             }
+
+            return;
+        }
+
+        CompanionNPC companionNPC = obj.GetComponent<CompanionNPC>();
+
+        if(companionNPC != null)
+        {
+            Debug.Log(
+                $"仲間NPCとの会話を開始: {companionNPC.gameObject.name}");
+
+            companionNPC.Interact();
+
+            GameManager.Instance.ChangeState(GameState.Dialogue);
+
+            return;
         }
 
         TreasureChest chest = obj.GetComponent<TreasureChest>();

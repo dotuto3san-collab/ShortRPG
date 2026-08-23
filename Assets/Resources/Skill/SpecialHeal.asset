@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec1805793aa6a044092722504f535489, type: 3}
-  m_Name: HealSkill
+  m_Name: SpecialHeal
   m_EditorClassIdentifier: 
   skillName: "\u56DE\u5FA9"
   type: 1
-  power: 50
-  effectText: "HP\u309250\u56DE\u5FA9\u3059\u308B"
-  descriptionText: "\u5F7C\u5973\u306E\u6301\u3061\u5473\u3067\u3042\u308B\u56DE\u5FA9\u6280\u3002\u65E5\u5E38\u3067\u3088\u304F\u3042\u308B\u50B7\u7A0B\u5EA6\u306A\u3089\u4F55\u3067\u3082\u6CBB\u305B\u308B\u3068\u3044\u3046\u3002"
-  slotType: 0
+  power: 100
+  effectText: "100\u56DE\u5FA9"
+  descriptionText: "\u4E3B\u4EBA\u516C\u306E\u30B9\u30AD\u30EB\u3002\u3068\u306B\u304B\u304F\u56DE\u5FA9\u3059\u308B"
+  slotType: 4

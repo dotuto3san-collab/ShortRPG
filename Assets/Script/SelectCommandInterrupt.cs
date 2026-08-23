@@ -31,6 +31,13 @@ public class SelectCommandInterrupt : IBattleCommand
 
         BattleUnit selectedTarget = BattleManager.Instance.GetSelectedTarget();
 
+        if(command == null)
+        {
+            Debug.LogError("SelectCommandInterrupt: ‘I‘ğ‚³‚ê‚½BattleCommand‚ªnull‚Å‚·B");
+
+            yield break;
+        }
+
         GameManager.Instance.ChangeState(GameState.BattleExecute);
 
         yield return command.Execute(user, selectedTarget);

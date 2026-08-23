@@ -31,6 +31,6 @@ public class HealEffect : ItemEffect
         target.Heal(healAmount);
 
         yield return BattleLogUI.Instance
-            .ShowLogAndWait($"{target.data.unitName}‚Í{healAmount}‰ñ•œ‚µ‚½I");
+            .ShowLogAndWait($"{target.GetUnitName()}‚Í{healAmount}‰ñ•œ‚µ‚½I");
     }
 }

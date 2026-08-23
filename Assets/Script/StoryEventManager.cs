@@ -62,7 +62,14 @@ public class StoryEventManager : MonoBehaviour
                 continue;
             }
 
-            events[entry.flagName] = entry.storyEvent;
+            if (events.ContainsKey(entry.flagName))
+            {
+                Debug.LogWarning(
+                    $"StoryEventManager: “¯‚¶flagName‚ªd•¡‚µ‚Ä‚¢‚Ü‚·BFlag = {entry.flagName}");
+                continue;
+            }
+
+            events.Add(entry.flagName, entry.storyEvent);
         }
     }
 

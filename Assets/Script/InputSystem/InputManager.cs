@@ -341,6 +341,13 @@ public class InputManager : MonoBehaviour
             return;
         }
 
+        if(SkillUI.Instance != null &&
+           SkillUI.Instance.IsActive())
+        {
+            SkillUI.Instance.HandleCancel();
+            return;
+        }
+
         // Œ»İ‚ÌƒQ[ƒ€ó‘Ô‚ğæ“¾‚·‚é
         GameState state = GameManager.Instance.CurrentState;
         Debug.Log($"Cancel pressed. GameState: {state}");
@@ -375,6 +382,13 @@ public class InputManager : MonoBehaviour
 
                     case MenuState.Equipment:
                         MenuManager.Instance.SetMenuState(MenuState.Main);
+                        return;
+
+                    case MenuState.Ability:
+                        if(AbilityUI.Instance != null)
+                        {
+                            AbilityUI.Instance.HandleCancel();
+                        }
                         return;
                 }
                 break;

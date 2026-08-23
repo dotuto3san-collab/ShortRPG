@@ -35,6 +35,7 @@ public class InkManager : MonoBehaviour
     private Story story;
     // 話しかけたNPCを記憶する
     private ShopNPC currentShopNPC;
+    private CompanionNPC currentCompanionNPC;
     // 現在動いているタイピング演出を覚えるための変数
     private Coroutine typingCoroutine;
     // タイピング中かどうか
@@ -109,6 +110,12 @@ public class InkManager : MonoBehaviour
             lookaheadSafe: false
         );
 
+        story.BindExternalFunction(
+            "JoinCompanion",
+            () => JoinCompanion(),
+            lookaheadSafe: false
+        );
+
         // 会話が始まったので会話ウィンドウを表示
         dialoguePanel.SetActive(true);
         // 三角アイコンが存在するなら
@@ -156,6 +163,41 @@ public class InkManager : MonoBehaviour
         }
 
         return StoryStateManager.Instance.HasFlag(flagName);
+    }
+
+    public void JoinCompanion()
+    {
+        if(currentCompanionNPC == null)
+        {
+            Debug.LogWarning(
+                "InkManager: 現在のCompanionNPCが設定されていません。");
+
+            return; 
+        }
+
+        CompanionData companionData =
+            currentCompanionNPC.GetCompanionData();
+
+        if(companionData == null)
+        {
+            Debug.LogWarning(
+                "InkManager: CompanionDataが設定されていません。");
+
+            return;
+        }
+
+        if (CompanionManager.Instance.HasCompanion(companionData))
+        {
+            Debug.Log(
+                $"既に仲間になっています: {companionData.companionName}");
+
+            return;
+        }
+
+        CompanionManager.Instance.AddCompanion(companionData);
+
+        Debug.Log(
+            $"Inkから仲間が加入: {companionData.companionName}");
     }
 
     // 会話中にどの状態か判定し対応した処理を行う
@@ -392,6 +434,11 @@ public class InkManager : MonoBehaviour
     {
         // currentShopNPCに会話中のNPCを登録
         currentShopNPC = npc;
+    }
+
+    public void SetCompanionNPC(CompanionNPC npc)
+    {
+        currentCompanionNPC = npc;
     }
 
     // 会話中にもう一度ZキーorEnterを押すと文字を最後まで一気に表示する

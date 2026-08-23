@@ -25,7 +25,6 @@ public class AbilityUI : MonoBehaviour
 
     [Header("Šm”F‰æ–Ê")]
     [SerializeField] private GameObject magicPanel;
-    [SerializeField] private GameObject skillPanel;
 
     [Header("–‚–@ˆê——")]
     [SerializeField] private Transform magicContent;
@@ -61,18 +60,13 @@ public class AbilityUI : MonoBehaviour
         CloseAllPanels();
     }
 
-    private void Update()
-    {
-        if (!gameObject.activeInHierarchy)
-        {
-            return;
-        }
-
-        HandleCancelInput();
-    }
-
     public void Open()
     {
+        if(SkillUI.Instance != null)
+        {
+            SkillUI.Instance.Close();
+        }
+
         if(abilityPanel != null)
         {
             abilityPanel.SetActive(true);
@@ -81,11 +75,6 @@ public class AbilityUI : MonoBehaviour
         if(magicPanel != null)
         {
             magicPanel.SetActive(false);
-        }
-
-        if(skillPanel != null)
-        {
-            skillPanel.SetActive(false);
         }
 
         if(magicCannotUseMessage != null)
@@ -107,11 +96,6 @@ public class AbilityUI : MonoBehaviour
             magicPanel.SetActive(true);
         }
 
-        if(skillPanel != null)
-        {
-            skillPanel.SetActive(false);
-        }
-
         if(magicCannotUseMessage != null)
         {
             magicCannotUseMessage.SetActive(false);
@@ -129,14 +113,14 @@ public class AbilityUI : MonoBehaviour
             magicPanel.SetActive(false);
         }
 
-        if(skillPanel != null)
-        {
-            skillPanel.SetActive(true);
-        }
-
         if(magicCannotUseMessage != null)
         {
             magicCannotUseMessage.SetActive(false);
+        }
+
+        if(SkillUI.Instance != null)
+        {
+            SkillUI.Instance.Open();
         }
     }
 
@@ -281,6 +265,10 @@ public class AbilityUI : MonoBehaviour
                 break;
 
             case AbilityState.Skill:
+                if (SkillUI.Instance != null)
+                {
+                    SkillUI.Instance.Open();
+                }
                 break;
         }
     }
@@ -370,64 +358,6 @@ public class AbilityUI : MonoBehaviour
         magicMessageCoroutine = null;
     }
 
-    private void HandleCancelInput()
-    {
-        bool cancelByShift =
-            Input.GetKeyDown(KeyCode.LeftShift) ||
-            Input.GetKeyDown(KeyCode.RightShift);
-
-        bool cancelByX =
-            Input.GetKeyDown(KeyCode.X);
-
-        if(!cancelByShift && !cancelByX)
-        {
-            return;
-        }
-
-        switch (currentState)
-        {
-            case AbilityState.Magic:
-            case AbilityState.Skill:
-
-                AbilityState previousState = currentState;
-
-                if (magicCannotUseMessage != null)
-                {
-                    magicCannotUseMessage.SetActive(false);
-                }
-
-                currentState = AbilityState.SelectAbility;
-
-                if(magicPanel != null)
-                {
-                    magicPanel.SetActive(false);
-                }
-
-                if(skillPanel != null)
-                {
-                    skillPanel.SetActive(false);
-                }
-
-                if(previousState == AbilityState.Magic)
-                {
-                    SelectObject(magicButton);
-                }
-                else if(previousState == AbilityState.Skill)
-                {
-                    SelectObject(skillButton);
-                }
-
-                    break;
-
-            case AbilityState.SelectAbility:
-                if(MenuManager.Instance != null)
-                {
-                    MenuManager.Instance.SetMenuState(MenuState.Main);
-                }
-                break;
-        }
-    }
-
     private void SelectFirstObject()
     {
         if(EventSystem.current == null)
@@ -467,6 +397,54 @@ public class AbilityUI : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(target);
     }
 
+    public void FocusSkillButton()
+    {
+        currentState = AbilityState.SelectAbility;
+
+        SelectObject(skillButton);
+    }
+
+    public void HandleCancel()
+    {
+        switch (currentState)
+        {
+            case AbilityState.Magic:
+                currentState = AbilityState.SelectAbility;
+                
+                if (magicPanel != null)
+                {
+                    magicPanel.SetActive(false);
+                }
+
+                if(magicCannotUseMessage != null)
+                {
+                    magicCannotUseMessage.SetActive(false);
+                }
+
+                SelectObject(magicButton);
+                break;
+
+            case AbilityState.Skill:
+                currentState = AbilityState.SelectAbility;
+
+                if(SkillUI.Instance != null)
+                {
+                    SkillUI.Instance.Close();
+                }
+
+                SelectObject(skillButton);
+                break;
+
+            case AbilityState.SelectAbility:
+
+                if(MenuManager.Instance != null)
+                {
+                    MenuManager.Instance.SetMenuState(MenuState.Main);
+                }
+                break;
+        }
+    }
+
     private void CloseAllPanels()
     {
         if(abilityPanel != null)
@@ -477,11 +455,6 @@ public class AbilityUI : MonoBehaviour
         if(magicPanel != null)
         {
             magicPanel.SetActive(false);
-        }
-
-        if(skillPanel != null)
-        {
-            skillPanel.SetActive(false);
         }
 
         if(magicCannotUseMessage != null)

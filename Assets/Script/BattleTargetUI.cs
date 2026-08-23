@@ -239,12 +239,12 @@ public class BattleTargetUI : MonoBehaviour
         }
         else if (returnToMagic)
         {
-            if (BattleItemUI.Instance != null)
+            if (BattleMagicUI.Instance != null)
             {
                 BattleMagicUI.Instance.Show();
             }
 
-            if(BattleMagicUI.Instance != null)
+            if(BattleHelpLog.Instance != null)
             {
                 BattleHelpLog.Instance.Show("–‚–@‚ð‘I‘ð‚µ‚Ä‚­‚¾‚³‚¢");
             }
