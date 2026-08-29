@@ -6,6 +6,7 @@ public class BattleData : ScriptableObject
     public string unitName;
     public int MaxHP;
     public int attack;
+    public int defense;
     public Sprite sprite;
 
     [Header("ŒoŒ±’l")]

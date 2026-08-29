@@ -5,7 +5,10 @@ public class AttackCommand : IBattleCommand
 {
     public IEnumerator Execute(BattleUnit user, BattleUnit target)
     {
-        if (target == null) yield break;
+        BattleUnit resolvedTarget =
+            BattleManager.Instance.ResolveAttackTarget(target);
+
+        if (resolvedTarget == null) yield break;
         
         bool isAwaken = Random.value < 0.05f;
 
@@ -29,10 +32,10 @@ public class AttackCommand : IBattleCommand
             damage = 1;
         }
 
-        target.TakeDamage(damage);
+        resolvedTarget.TakeDamage(damage);
 
         yield return BattleLogUI.Instance.ShowLogAndWait(
-            $"{target.data.unitName}に{damage}ダメージ与えた！"
+            $"{resolvedTarget.data.unitName}に{damage}ダメージ与えた！"
             );
     }
 }

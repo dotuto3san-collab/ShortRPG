@@ -21,6 +21,13 @@ public class SkillData : ScriptableObject
     [Header("Œø‰Ê")]
     public int power;
 
+    [Header("ƒfƒoƒtŒø‰Ê")]
+    [Range(0, 100)]
+    public int attackDebuffRate;
+
+    [Range(0, 100)]
+    public int defenseDebuffRate;
+
     [TextArea(2, 4)]
     public string effectText;
 

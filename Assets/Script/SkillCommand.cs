@@ -84,6 +84,43 @@ public class SkillCommand : IBattleCommand
 
                 break;
             }
+
+            case SkillType.Debuff:
+            {
+                int damage = skill.power;
+
+                float attackDebuffRate =
+                        skill.attackDebuffRate / 100f;
+
+                    float defenseDebuffRate =
+                            skill.defenseDebuffRate / 100f;
+
+                var enemies = BattleManager.Instance.enemies;
+
+                foreach(var enemy in enemies)
+                {
+                    if(enemy == null || enemy.IsDead())
+                        continue;
+
+                    enemy.TakeDamage(damage);
+
+                    yield return BattleLogUI.Instance.ShowLogAndWait(
+                        $"{enemy.GetUnitName()}に{damage}ダメージ！"
+                    );
+
+                    if (enemy.IsDead())
+                        continue;
+
+                    enemy.ApplyAttackDebuff(attackDebuffRate);
+                    enemy.ApplyDefenseDebuff(defenseDebuffRate);
+
+                    yield return BattleLogUI.Instance.ShowLogAndWait(
+                        $"{enemy.GetUnitName()}の攻撃力が{skill.attackDebuffRate}%、\n" +
+                        $"防御力が{skill.defenseDebuffRate}%減少した。");
+                }
+
+                break;
+            }
         }
 
         yield return null;

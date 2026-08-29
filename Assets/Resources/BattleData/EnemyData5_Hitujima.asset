@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fd5af69a94cba734ebe597dcdb849272, type: 3}
-  m_Name: EnemyData3_ArrowChicken
+  m_Name: EnemyData5_Hitujima
   m_EditorClassIdentifier: 
-  unitName: "\u30A2\u30ED\u30FC\u30C1\u30AD\u30F3"
-  MaxHP: 40
-  attack: 20
-  defense: 20
-  sprite: {fileID: -304033916, guid: 683f6898e14b97b4db0892ab40a2b3cc, type: 3}
-  expReward: 15
+  unitName: "\u30D2\u30C4\u30B8\u9B54"
+  MaxHP: 9999
+  attack: 1
+  defense: 999
+  sprite: {fileID: 104903846, guid: 683f6898e14b97b4db0892ab40a2b3cc, type: 3}
+  expReward: 9999

@@ -9,6 +9,9 @@ public class BattleUnit : MonoBehaviour
 
     private int attackBuff = 0;
 
+    private float attackDebuffRate = 0f;
+    private float defenseDebuffRate = 0f;
+
     private int awakenTurn = 0;
     private float awakenRate = 1.3f;
 
@@ -42,6 +45,9 @@ public class BattleUnit : MonoBehaviour
     public void Init()
     {
         attackBuff = 0;
+        attackDebuffRate = 0f;
+        defenseDebuffRate = 0f;
+
         awakenTurn = 0;
         hasGivenExp = false;
 
@@ -141,17 +147,48 @@ public class BattleUnit : MonoBehaviour
     {
         int atk = data.attack + attackBuff;
 
+        if(attackDebuffRate > 0f)
+        {
+            atk = Mathf.RoundToInt(
+                atk * (1f - attackDebuffRate));
+        }
+
         if (IsAwaken())
         {
             atk = Mathf.RoundToInt(atk * awakenRate);
         }
 
-        return atk;
+        return Mathf.Max(0, atk);
+    }
+
+    public int GetDefense()
+    {
+        int defense = data.defense;
+
+        if(defenseDebuffRate > 0f)
+        {
+            defense = Mathf.RoundToInt(
+                defense * (1f - defenseDebuffRate));
+        }
+
+        return Mathf.Max(0, defense);
     }
 
     public void AddAttackBuff(int amount)
     {
         attackBuff += amount;
+    }
+
+    public void ApplyAttackDebuff(float rate)
+    {
+        attackDebuffRate = Mathf.Clamp01(
+            attackDebuffRate + rate);
+    }
+
+    public void ApplyDefenseDebuff(float rate)
+    {
+        defenseDebuffRate = Mathf.Clamp01(
+            defenseDebuffRate + rate);
     }
 
     public void Attack(BattleUnit target)

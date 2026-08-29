@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
@@ -71,7 +72,7 @@ public class BattleManager : MonoBehaviour
 
     void Update()
     {
-        if(GameManager.Instance.CurrentState != GameState.BattleCommand &&
+        if (GameManager.Instance.CurrentState != GameState.BattleCommand &&
            GameManager.Instance.CurrentState != GameState.BattleExecute)
         {
             return;
@@ -81,7 +82,7 @@ public class BattleManager : MonoBehaviour
         {
             UseSpecialSkill();
         }
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             UseSkill(0);
         }
@@ -101,7 +102,7 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle(BattleUnit p, List<BattleUnit> enemyList)
     {
-        if(p == null || enemyList == null || enemyList.Count == 0)
+        if (p == null || enemyList == null || enemyList.Count == 0)
         {
             Debug.LogError("BattleUnit is null");
             return;
@@ -126,25 +127,25 @@ public class BattleManager : MonoBehaviour
 
         if (SpecialGaugeUI.Instance != null)
         {
-            SpecialGaugeUI.Instance.SetGauge(currentSpecialGauge,maxSpecialGauge);
+            SpecialGaugeUI.Instance.SetGauge(currentSpecialGauge, maxSpecialGauge);
         }
 
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             skillUseCounts[i] = 0;
         }
 
-        if(SkillBarUI.Instance != null)
+        if (SkillBarUI.Instance != null)
         {
             SkillBarUI.Instance.Init();
         }
 
-        if(BattleUI.Instance != null)
+        if (BattleUI.Instance != null)
         {
             BattleUI.Instance.Show();
         }
 
-        if(BattleCommandUI.Instance != null)
+        if (BattleCommandUI.Instance != null)
         {
             BattleCommandUI.Instance.Hide();
         }
@@ -156,7 +157,7 @@ public class BattleManager : MonoBehaviour
 
         GameManager.Instance.ChangeState(GameState.BattleCommand);
 
-        if(battleCoroutine != null)
+        if (battleCoroutine != null)
         {
             StopCoroutine(battleCoroutine);
         }
@@ -165,8 +166,48 @@ public class BattleManager : MonoBehaviour
 
     private IEnumerator BattleLoop()
     {
-        string enemyNames = string.Join("、 ",enemies.ConvertAll(e => e.data.unitName));
+        string enemyNames = string.Join("、 ", enemies.ConvertAll(e => e.data.unitName));
         yield return BattleLogUI.Instance.ShowLogAndWait($"{enemyNames}が現れた！");
+
+        canInterruptNow = true;
+        yield return TryProcessInterrupt(player);
+
+        if (AreAllEnemiesDead())
+        {
+            int preBattleExpGained = 0;
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsDead() && !enemy.hasGivenExp)
+                {
+                    enemy.hasGivenExp = true;
+                    preBattleExpGained += enemy.data.expReward;
+                }
+            }
+
+            if (preBattleExpGained > 0)
+            {
+                int prevLevel = PlayerStatus.Instance.GetLevel();
+                int levelUpCount = PlayerStatus.Instance.AddExperience(preBattleExpGained);
+                int newLevel = PlayerStatus.Instance.GetLevel();
+
+                yield return BattleLogUI.Instance.ShowLogAndWait(
+                    $"敵を全て倒した！\n経験値を{preBattleExpGained}獲得した",
+                    true
+                );
+
+                if(levelUpCount > 0)
+                {
+                    yield return BattleLogUI.Instance.ShowLogAndWait(
+                        $"{player.GetUnitName()}はレベルアップした！\nLv.{prevLevel} -> {newLevel}",
+                        true
+                    );
+                }
+            }
+
+            EndBattleRoutine();
+            yield break;
+        }
 
         while (true)
         {
@@ -189,8 +230,8 @@ public class BattleManager : MonoBehaviour
             BattleHelpLog.Instance.SetMessage("コマンドを選択してください");
 
             yield return new WaitUntil(() => selectedCommand != null || escapeRequested);
-            
-            if(escapeRequested)
+
+            if (escapeRequested)
             {
                 EndBattleRoutine();
                 yield break;
@@ -230,7 +271,7 @@ public class BattleManager : MonoBehaviour
 
             GameManager.Instance.ChangeState(GameState.BattleExecute);
 
-            while(reservedCommands.Count > 0)
+            while (reservedCommands.Count > 0)
             {
                 if (AreAllEnemiesDead())
                 {
@@ -255,16 +296,16 @@ public class BattleManager : MonoBehaviour
                 {
                     int skillExpGained = 0;
 
-                    foreach(var enemy in enemies)
+                    foreach (var enemy in enemies)
                     {
-                        if(enemy.IsDead() && !enemy.hasGivenExp)
+                        if (enemy.IsDead() && !enemy.hasGivenExp)
                         {
                             enemy.hasGivenExp = true;
                             skillExpGained += enemy.data.expReward;
                         }
                     }
 
-                    if(skillExpGained > 0)
+                    if (skillExpGained > 0)
                     {
                         int prevLevel = PlayerStatus.Instance.GetLevel();
                         int levelUpCount = PlayerStatus.Instance.AddExperience(skillExpGained);
@@ -275,7 +316,7 @@ public class BattleManager : MonoBehaviour
                             true
                         );
 
-                        if(levelUpCount > 0)
+                        if (levelUpCount > 0)
                         {
                             yield return BattleLogUI.Instance.ShowLogAndWait(
                                 $"{player.GetUnitName()}はレベルアップした！\nLv.{prevLevel} → {newLevel}",
@@ -303,7 +344,7 @@ public class BattleManager : MonoBehaviour
 
             int totalExpGained = 0;
 
-            foreach(var enemy in enemies)
+            foreach (var enemy in enemies)
             {
                 if (enemy.IsDead())
                 {
@@ -339,7 +380,7 @@ public class BattleManager : MonoBehaviour
                     );
                 }
 
-                if(levelUpCount > 0)
+                if (levelUpCount > 0)
                 {
                     Debug.Log($"レベルアップ表示するはず: {prevLevel} → {newLevel}");
                     yield return BattleLogUI.Instance.ShowLogAndWait(
@@ -347,7 +388,7 @@ public class BattleManager : MonoBehaviour
                         true
                     );
                     Debug.Log("レベルアップ表示完了！");
-                } 
+                }
             }
 
             if (allDead)
@@ -368,11 +409,57 @@ public class BattleManager : MonoBehaviour
             selectedCommand = null;
             isExecuting = false;
 
-            if(currentSpecialGauge < maxSpecialGauge)
+            if (AreAllEnemiesDead())
+            {
+                int interruptExpGained = 0;
+
+                foreach(var enemy in enemies)
+                {
+                    if(enemy != null &&
+                       enemy.IsDead() &&
+                       !enemy.hasGivenExp)
+                    {
+                        enemy.hasGivenExp = true;
+                        interruptExpGained += enemy.data.expReward;
+                    }
+                }
+
+                if(interruptExpGained > 0)
+                {
+                    int prevLevel = PlayerStatus.Instance.GetLevel();
+
+                    int levelUpCount =
+                        PlayerStatus.Instance.AddExperience(
+                            interruptExpGained);
+
+                    int newLevel = PlayerStatus.Instance.GetLevel();
+
+                    yield return BattleLogUI.Instance.ShowLogAndWait(
+                        $"敵を全て倒した！\n経験値を{interruptExpGained}獲得した",
+                        true
+                    );
+
+                    if(levelUpCount > 0)
+                    {
+                        yield return BattleLogUI.Instance.ShowLogAndWait(
+                            $"{player.GetUnitName()}はレベルアップした！\nLv.{prevLevel} -> {newLevel}",
+                            true
+                        );
+                    }
+                }
+
+                EndBattleRoutine();
+                yield break;
+            }
+
+            selectedCommand = null;
+            isExecuting = false;
+
+            if (currentSpecialGauge < maxSpecialGauge)
             {
                 currentSpecialGauge++;
 
-                if(SpecialGaugeUI.Instance != null)
+                if (SpecialGaugeUI.Instance != null)
                 {
                     SpecialGaugeUI.Instance.SetGauge(currentSpecialGauge, maxSpecialGauge);
                 }
@@ -382,9 +469,9 @@ public class BattleManager : MonoBehaviour
 
             yield return new WaitForSeconds(0.5f);
 
-            foreach(var enemy in enemies)
+            foreach (var enemy in enemies)
             {
-                if(enemy.IsDead()) continue;
+                if (enemy.IsDead()) continue;
 
                 canInterruptNow = false;
 
@@ -399,7 +486,7 @@ public class BattleManager : MonoBehaviour
                 }
 
                 player.TakeDamage(damage);
-            
+
                 yield return BattleLogUI.Instance.ShowLogAndWait(
                     $"{player.GetUnitName()}は{damage}のダメージを受けた！"
                 );
@@ -462,7 +549,7 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        if(isExecuting && !(command is EscapeCommand))return;
+        if (isExecuting && !(command is EscapeCommand)) return;
 
         if (command == null)
         {
@@ -472,7 +559,7 @@ public class BattleManager : MonoBehaviour
 
         selectedCommand = command;
 
-        if(BattleCommandUI.Instance != null)
+        if (BattleCommandUI.Instance != null)
         {
             BattleCommandUI.Instance.Hide();
         }
@@ -480,7 +567,7 @@ public class BattleManager : MonoBehaviour
 
     public void UseMagic(MagicData magic)
     {
-        if(magic == null) return;
+        if (magic == null) return;
 
         switch (magic.targetType)
         {
@@ -513,6 +600,24 @@ public class BattleManager : MonoBehaviour
         selectedTarget = target;
     }
 
+    public BattleUnit ResolveAttackTarget(BattleUnit reservedTarget)
+    {
+        if(reservedTarget != null && !reservedTarget.IsDead())
+        {
+            return reservedTarget;
+        }
+
+        foreach(var enemy in enemies)
+        {
+            if(enemy != null && !enemy.IsDead())
+            {
+                return enemy;
+            }
+        }
+
+        return null;
+    }
+
     public void EnqueueReservedAction(
         IBattleCommand command,
         BattleUnit target)
@@ -531,14 +636,14 @@ public class BattleManager : MonoBehaviour
 
     public void RequestInterrupt(IBattleCommand command)
     {
-        if (command == null)  return;
+        if (command == null) return;
 
         interruptCommands.Enqueue(command);
     }
 
     private IEnumerator TryProcessInterrupt(BattleUnit user)
     {
-        if(interruptCommands.Count == 0) yield break;
+        if (interruptCommands.Count == 0) yield break;
 
         if (!canInterruptNow && reservedInterruptCount == 0) yield break;
 
@@ -586,7 +691,7 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log($"[UseSkill] 仲間スキル index:{index}");
 
-        if(CompanionManager.Instance == null)
+        if (CompanionManager.Instance == null)
         {
             Debug.LogError("[UseSkill] CompanionManager.Instanceが存在しません");
             return;
@@ -596,7 +701,7 @@ public class BattleManager : MonoBehaviour
 
         CompanionStatus companion =
             CompanionManager.Instance.GetCompanion(companionIndex);
-        
+
         if (companion == null)
         {
             Debug.Log($"[UseSkill] 仲間{index + 1}が存在しません");
@@ -605,7 +710,7 @@ public class BattleManager : MonoBehaviour
 
         SkillData skill = companion.EquippedSkill;
 
-        if(skill == null)
+        if (skill == null)
         {
             Debug.Log(
                 $"[UseSkill] 仲間{index + 1}に装備スキルがありません");
@@ -666,25 +771,25 @@ public class BattleManager : MonoBehaviour
 
     void UseSpecialSkill()
     {
-        if(currentSpecialGauge < maxSpecialGauge)
+        if (currentSpecialGauge < maxSpecialGauge)
         {
             Debug.Log("ゲージ不足");
             return;
         }
-        
+
         var skill = PlayerStatus.Instance.GetSkill(SkillSlotType.Special);
 
         currentSpecialGauge = 0;
         SpecialGaugeUI.Instance?.SetGauge(currentSpecialGauge, maxSpecialGauge);
 
-        if(skill == null) return;
+        if (skill == null) return;
 
-        if(isPlayerCommandPhase)
+        if (isPlayerCommandPhase)
         {
             EnqueueReservedAction(
                 new SkillCommand(
                     skill,
-                    player.GetUnitName()), 
+                    player.GetUnitName()),
                 null);
         }
         else

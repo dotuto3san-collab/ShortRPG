@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using TMPro;
+using Unity.VisualScripting;
 
 public class ShopManager : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI playerNameText;
     [SerializeField] private TextMeshProUGUI playerHPText;
     [SerializeField] private Slider playerHPBar;
+    [SerializeField] private Image playerIconImage;
 
     [Header("装備アイテムパネル - 現在のステータス")]
     [SerializeField] private TextMeshProUGUI equipmentAttackText;
@@ -535,6 +537,23 @@ public class ShopManager : MonoBehaviour
         {
             playerHPBar.maxValue = maxHP;
             playerHPBar.value = currentHP;
+        }
+
+        if(playerIconImage != null)
+        {
+            CompanionStatus playerCompanion =
+                CompanionManager.Instance != null
+                    ? CompanionManager.Instance.GetPlayerStatus()
+                    : null;
+
+            Sprite playerIcon =
+                playerCompanion != null &&
+                playerCompanion.Data != null
+                    ? playerCompanion.Data.icon
+                    : null;
+
+            playerIconImage.sprite = playerIcon;
+            playerIconImage.enabled = playerIcon != null;
         }
     }
 

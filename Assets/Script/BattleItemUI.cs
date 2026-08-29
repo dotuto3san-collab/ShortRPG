@@ -20,10 +20,26 @@ public class BattleItemUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI itemEffectText;
 
+    [Header("ÉAÉCÉeÉÄèÓïÒ")]
+    [SerializeField] private GameObject itemInfoRoot;
+    [SerializeField] private Image itemIconImage;
+
     void Awake()
     {
         Instance = this;
+
         root.SetActive(false);
+
+        if(itemInfoRoot != null)
+        {
+            itemInfoRoot.SetActive(false);
+        }
+
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = null;
+            itemIconImage.gameObject.SetActive(false);
+        }
     }
 
     public void Show()
@@ -35,12 +51,34 @@ public class BattleItemUI : MonoBehaviour
             itemEffectText.text = "";
         }
 
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = null;
+            itemIconImage.gameObject.SetActive(false);
+        }
+
         Refresh();
     }
 
     public void Hide()
     {
         root.SetActive(false);
+
+        if(itemInfoRoot != null)
+        {
+            itemInfoRoot.SetActive(false);
+        }
+
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = null;
+            itemIconImage.gameObject.SetActive(false);
+        }
+
+        if(itemEffectText != null)
+        {
+            itemEffectText.text = "";
+        }
     }
 
     void Update()
@@ -208,9 +246,20 @@ public class BattleItemUI : MonoBehaviour
         lastUsedItemData = item;
         lastUsedItemIndex = index;
 
+        if(itemInfoRoot != null)
+        {
+            itemInfoRoot.SetActive(true);
+        }
+
         if(itemEffectText != null)
         {
             itemEffectText.text = item.effectText;
+        }
+
+        if(itemIconImage != null)
+        {
+            itemIconImage.sprite = item.icon;
+            itemIconImage.gameObject.SetActive(item.icon != null);
         }
     }
 

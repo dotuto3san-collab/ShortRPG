@@ -13,6 +13,9 @@ public class MagicCommand : IBattleCommand
 
     public IEnumerator Execute(BattleUnit user, BattleUnit target)
     {
+        BattleUnit resolvedTarget =
+            BattleManager.Instance.ResolveAttackTarget(target);
+
         yield return BattleLogUI.Instance.ShowLogAndWait(
             $"{user.GetUnitName()}は{magic.magicName}を唱えた！"
         );
@@ -35,12 +38,12 @@ public class MagicCommand : IBattleCommand
                         }
                     }
                 }
-                else if(target != null)
+                else if(resolvedTarget != null)
                 {
-                    target.TakeDamage(magic.power);
+                    resolvedTarget.TakeDamage(magic.power);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
-                        $"{target.GetUnitName()}に{magic.power}ダメージ！"
+                        $"{resolvedTarget.GetUnitName()}に{magic.power}ダメージ！"
                     );
                 }
                 break;

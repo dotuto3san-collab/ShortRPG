@@ -15,4 +15,8 @@ MonoBehaviour:
   skillName: "\u5F31\u5316"
   type: 2
   power: 50
+  attackDebuffRate: 10
+  defenseDebuffRate: 10
+  effectText: 
+  descriptionText: 
   slotType: 1

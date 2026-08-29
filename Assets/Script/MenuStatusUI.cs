@@ -11,6 +11,11 @@ public class MenuStatusUI : MonoBehaviour
     [Header("キャラクター表示")]
     [SerializeField] private Image characterIcon;
 
+    [Header("仲間表示")]
+    [SerializeField] private GameObject[] companionRoots;
+    [SerializeField] private Image[] companionIcons;
+    [SerializeField] private TextMeshProUGUI[] companionNames;
+
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private TextMeshProUGUI chargeText;
@@ -115,6 +120,50 @@ public class MenuStatusUI : MonoBehaviour
         {
             chargeText.text = ps.Charge.ToString();
         }
-    
+
+        UpdateCompanionDisplay();
+    }
+
+    private void UpdateCompanionDisplay()
+    {
+        if(CompanionManager.Instance == null)
+        {
+            Debug.LogError("[MenuStatusUI] ConpanionManager.Instance が存在しません");
+            return;
+        }
+
+        var companions = CompanionManager.Instance.GetCompanion();
+
+        for(int i = 0;i < companionRoots.Length; i++)
+        {
+            int companionIndex = i + 1;
+
+            bool hasCompanion =
+                companionIndex < companions.Count &&
+                companions[companionIndex] != null;
+
+            if (companionRoots[i] != null)
+            {
+                companionRoots[i].SetActive(hasCompanion);
+            }
+
+            if (!hasCompanion)
+            {
+                continue;
+            }
+
+            CompanionStatus companion = companions[companionIndex];
+
+            if(companionIcons[i] != null)
+            {
+                companionIcons[i].sprite = companion.Data.icon;
+                companionIcons[i].enabled = companion.Data.icon != null;
+            }
+
+            if (companionNames[i] != null)
+            {
+                companionNames[i].text = companion.Data.companionName;
+            }
+        }
     }
 }

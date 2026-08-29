@@ -15,4 +15,6 @@ MonoBehaviour:
   unitName: "\u30E2\u30D2\u30AB\u30F3\u30D4\u30C3\u30B0"
   MaxHP: 50
   attack: 10
+  defense: 5
   sprite: {fileID: 3874357053985992593, guid: 683f6898e14b97b4db0892ab40a2b3cc, type: 3}
+  expReward: 10
