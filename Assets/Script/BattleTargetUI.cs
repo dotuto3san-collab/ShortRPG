@@ -280,7 +280,7 @@ public class BattleTargetUI : MonoBehaviour
             if(i == currentIndex)
             {
                 enemyNameTexts[i].gameObject.SetActive(true);
-                enemyNameTexts[i].text = BattleManager.Instance.enemies[i].data.unitName;
+                enemyNameTexts[i].text = BattleManager.Instance.enemies[i].GetBattleDisplayName();
             }
             else
             {

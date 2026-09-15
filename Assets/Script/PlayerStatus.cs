@@ -97,7 +97,6 @@ public class PlayerStatus : MonoBehaviour
         Debug.Log("PlayerStatus Awake; " + this.GetInstanceID());
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         if(currentHP == 0)
         {

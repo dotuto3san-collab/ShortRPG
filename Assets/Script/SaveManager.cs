@@ -12,7 +12,6 @@ public class SaveManager : MonoBehaviour
         if(Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else if(Instance != this)
         {
@@ -73,6 +72,20 @@ public class SaveManager : MonoBehaviour
             Debug.LogError("InventoryManager not found during Save");
         }
 
+        if(StoryStateManager.Instance != null)
+        {
+            data.storyFlags = StoryStateManager.Instance.GetAllFlags();
+        }
+        else
+        {
+            Debug.LogError("StoryStateManager not found during Save");
+        }
+
+        if(StoryCharacterPositionManager.Instance != null)
+        {
+            data.characterPositions = StoryCharacterPositionManager.Instance.GetAllPositions();
+        }
+
         MainMove player = GameManager.Instance.Player;
         if (player != null)
         {
@@ -111,9 +124,29 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene(data.sceneName);
+        SceneTransitionManager.Instance.LoadForSaveData(data.sceneName, data.playerPosition, () =>
+        {
+            GameManager.Instance.SetMoney(data.money);
+            InventoryManager.Instance.LoadFromSaveData(data.items);
 
-        StartCoroutine(LoadAfterScene(data));
+            if(StoryStateManager.Instance != null)
+            {
+                StoryStateManager.Instance.LoadFlags(data.storyFlags);
+            }
+
+            if(StoryCharacterPositionManager.Instance != null)
+            {
+                StoryCharacterPositionManager.Instance.LoadPositions(data.characterPositions);
+            }
+
+            var player = FindFirstObjectByType<MainMove>();
+            if (player != null)
+            {
+                player.transform.position = data.playerPosition;
+            }
+
+            GameManager.Instance.ChangeState(GameState.Exploring);
+        });
     }
 
     private System.Collections.IEnumerator LoadAfterScene(SaveData data)

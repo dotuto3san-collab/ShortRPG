@@ -35,7 +35,7 @@ public class AttackCommand : IBattleCommand
         resolvedTarget.TakeDamage(damage);
 
         yield return BattleLogUI.Instance.ShowLogAndWait(
-            $"{resolvedTarget.data.unitName}に{damage}ダメージ与えた！"
+            $"{resolvedTarget.GetBattleDisplayName()}に{damage}ダメージ与えた！"
             );
     }
 }

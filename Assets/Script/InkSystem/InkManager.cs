@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEditor.SearchService;
 
 public class InkManager : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class InkManager : MonoBehaviour
     // 次へ進む三角のアイコンを参照
     [SerializeField] private Animator nextIconAnimator;
 
+    [SerializeField] private CanvasGroup dialogueCanvasGroup;
+
     [Header("ショップ連携用")]
     // Inspectorにて会話を始めた際に実行する処理を決める
     public UnityEvent onOpenRequest;
@@ -44,6 +47,10 @@ public class InkManager : MonoBehaviour
     private bool isAnimationFinished = false;
     // 分岐選択の選択直後の選択フラグ
     private bool isInputPostChoiceDelay;
+
+    private Queue<IEnumerator> storyActionQueue = new Queue<IEnumerator>();
+    private bool isProcessingStoryAction = false;
+    private int pendingStoryActionCount => storyActionQueue.Count + (isProcessingStoryAction ? 1 : 0);
 
     // Startより早く実行される
     void Awake()
@@ -116,8 +123,55 @@ public class InkManager : MonoBehaviour
             lookaheadSafe: false
         );
 
+        story.BindExternalFunction(
+            "MoveCharacter",
+            (string id, string direction, int tiles) => RequestCharacterMove(id, direction, tiles),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "HideTextPanel",
+            () => HideTextPanel(),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "ShowTextPanel",
+            () => ShowTextPanel(),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "DespawnCharacter",
+            (string id, bool useFade) => RequestCharacterDespawn(id, useFade),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "Wait",
+            (float seconds) => RequestWait(seconds),
+            lookaheadSafe: false
+        );
+
+        story.BindExternalFunction(
+            "ReturnCameraToPlayer",
+            () => RequestReturnCameraToPlayer(),
+            lookaheadSafe: false
+        );
+
+        storyActionQueue.Clear();
+        isProcessingStoryAction = false;
+
         // 会話が始まったので会話ウィンドウを表示
         dialoguePanel.SetActive(true);
+
+        if(dialogueCanvasGroup != null)
+        {
+            dialogueCanvasGroup.alpha = 1f;
+            dialogueCanvasGroup.interactable = true;
+            dialogueCanvasGroup.blocksRaycasts = true;
+        }
+
         // 三角アイコンが存在するなら
         if(nextIconAnimator != null)
         {
@@ -200,9 +254,124 @@ public class InkManager : MonoBehaviour
             $"Inkから仲間が加入: {companionData.companionName}");
     }
 
+    public void RequestCharacterMove(string id, string direction, int tiles)
+    {
+        if (StoryCharacterRegistry.Instance == null)
+        {
+            Debug.LogWarning("InkManager: StoryCharacterRegistry.Instanceが存在しません。");
+            return;
+        }
+
+        StoryCharacterMover mover = StoryCharacterRegistry.Instance.Get(id);
+        if(mover == null)
+        {
+            Debug.LogWarning($"InkManager: キャラクターが見つかりません。ID = {id}");
+            return;
+        }
+
+        Vector2Int dir = StoryCharacterMover.GetDirection(direction);
+        if (dir == Vector2Int.zero) return;
+
+        EnqueueStoryAction(mover.Move(dir, tiles));
+    }
+
+    public void RequestCharacterDespawn(string id, bool useFade)
+    {
+        if(StoryCharacterRegistry.Instance == null)
+        {
+            Debug.LogWarning("InkManager: StoryCharacterRegistry.Instanceが存在しません。");
+            return;
+        }
+
+        StoryCharacterMover mover = StoryCharacterRegistry.Instance.Get(id);
+        if(mover == null)
+        {
+            Debug.LogWarning($"InkManager: キャラクターが見つかりません。ID = {id}");
+            return;
+        }
+
+        EnqueueStoryAction(mover.Despawn(useFade));
+    }
+
+    public void RequestWait(float seconds)
+    {
+        if (seconds <= 0f) return;
+
+        EnqueueStoryAction(WaitRoutine(seconds));
+    }
+
+    public void RequestReturnCameraToPlayer()
+    {
+        EnqueueStoryAction(ReturnCameraRoutine());
+    }
+
+    private IEnumerator ReturnCameraRoutine()
+    {
+        if(SceneTransitionManager.Instance == null) yield break;
+        
+        HideTextPanel();
+
+        yield return StartCoroutine(
+            SceneTransitionManager.Instance.EventFadeRoutine(() =>
+            {
+                SceneTransitionManager.Instance.ReturnCameraToPlayer();
+            })
+        );
+
+        ShowTextPanel();
+    }
+
+    private IEnumerator WaitRoutine(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+    }
+
+    private void EnqueueStoryAction(IEnumerator action)
+    {
+        storyActionQueue.Enqueue(action);
+
+        if (!isProcessingStoryAction)
+        {
+            StartCoroutine(ProcessStoryActionQueue());
+        }
+    }
+
+    private IEnumerator ProcessStoryActionQueue()
+    {
+        isProcessingStoryAction = true;
+
+        while(storyActionQueue.Count > 0)
+        {
+            IEnumerator action = storyActionQueue.Dequeue();
+            yield return StartCoroutine(action);
+        }
+
+        isProcessingStoryAction = false;
+    }
+
+    public void HideTextPanel()
+    {
+        if (dialogueCanvasGroup == null) return;
+
+        dialogueCanvasGroup.alpha = 0f;
+        dialogueCanvasGroup.interactable = false;
+        dialogueCanvasGroup.blocksRaycasts = false;
+    }
+
+    public void ShowTextPanel()
+    {
+        if (dialogueCanvasGroup == null) return;
+
+        dialogueCanvasGroup.alpha = 1f;
+        dialogueCanvasGroup.interactable = true;
+        dialogueCanvasGroup.blocksRaycasts = true;
+    }
+
     // 会話中にどの状態か判定し対応した処理を行う
     public void OnSubmit()
     {
+        if (pendingStoryActionCount > 0) return;
+
         // 分岐選択直後の選択フラグがあるなら下記処理を無視
         if (isInputPostChoiceDelay) return;
 
@@ -256,14 +425,38 @@ public class InkManager : MonoBehaviour
             // ボタンをまっさらにする
             choiceManager.ClearChoices();
         }
-        // Inkから次の1行を取得してtextに格納
-        text = story.Continue();
-        // 名前表示に関する処理を行う
-        HandleTags();
+
+        do
+        {
+            // Inkから次の1行を取得してtextに格納
+            text = story.Continue();
+            // 名前表示に関する処理を行う
+            HandleTags();
+        }while(string.IsNullOrWhiteSpace(text) && story.canContinue && story.currentChoices.Count == 0);
+
+        if(string.IsNullOrEmpty(text) && story.currentChoices.Count == 0 && !story.canContinue)
+        {
+            if(pendingStoryActionCount > 0)
+            {
+                StartCoroutine(FinishStoryAfterPendingActions());
+            }
+            else
+            {
+                FinishStory();
+            }
+            return;
+        }
+
         // =====Debug textに格納した文字をデバッグに表示=====
         Debug.Log(text);
         // コルーチンを開始する
         typingCoroutine = StartCoroutine(TypeText(text));
+    }
+
+    private IEnumerator FinishStoryAfterPendingActions()
+    {
+        yield return new WaitUntil(() => pendingStoryActionCount <= 0);
+        FinishStory();
     }
 
     private void HandleTags()
@@ -493,8 +686,16 @@ public class InkManager : MonoBehaviour
             // コルーチンをnullにする
             typingCoroutine = null;
         }
+
+        if(dialogueCanvasGroup != null)
+        {
+            dialogueCanvasGroup.alpha = 1f;
+            dialogueCanvasGroup.interactable = true;
+            dialogueCanvasGroup.blocksRaycasts = true;
+        }
+
         // panelAnimatorが存在する場合
-        if(panelAnimator != null)
+        if (panelAnimator != null)
         {
             // 物語終了時にAnimationを閉じる
             panelAnimator.SetBool("isOpen", false);

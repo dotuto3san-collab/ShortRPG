@@ -42,8 +42,6 @@ public class GameManager : MonoBehaviour
         }
         // シングルトンを確立
         Instance = this;
-        // シーンをまたいで保持
-        DontDestroyOnLoad(gameObject);
         // 初期段階では自由に動ける状態にしておく
         ChangeState(GameState.Exploring );
     }

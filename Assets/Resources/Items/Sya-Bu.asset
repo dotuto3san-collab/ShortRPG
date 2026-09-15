@@ -12,12 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
   m_Name: Sya-Bu
   m_EditorClassIdentifier: 
-  itemId: 016
+  itemId: 998
   itemName: "\u30B7\u30E3\u30FC\u30D6"
+  effectText: 
   description: "5\u30BF\u30FC\u30F3\u5F37\u304F\u306A\u308B"
   icon: {fileID: 0}
   buyPrice: 11000
   sellPrice: 0
   canSell: 1
-  type: 0
+  canUseInBattle: 0
+  canUseInField: 0
+  useEffect: {fileID: 0}
+  equipData:
+    attackPower: 0
+    defensePower: 0
+    chargePower: 0
+    equipType: 0
   rarity: 4

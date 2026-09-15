@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
   m_Name: YaibanoIsi
   m_EditorClassIdentifier: 
-  itemId: 31
+  itemId: 10
   itemName: "\u5203\u306E\u77F3"
   effectText: "\u6575\u306B50\u30C0\u30E1\u30FC\u30B8"
   description: "\u5305\u4E01\u306E\u3088\u3046\u306B\u5207\u308C\u308B\u77F3\u3002\u592A\u53E4\u306E\u6614\u306F\u6B66\u5668\u306B\u4F7F\u308F\u308C\u3066\u3044\u305F\u3068\u304B\u3002"

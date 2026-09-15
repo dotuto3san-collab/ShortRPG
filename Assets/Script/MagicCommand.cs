@@ -33,7 +33,7 @@ public class MagicCommand : IBattleCommand
                             enemy.TakeDamage(magic.power);
 
                             yield return BattleLogUI.Instance.ShowLogAndWait(
-                                $"{enemy.GetUnitName()}に{magic.power}ダメージ"
+                                $"{enemy.GetBattleDisplayName()}に{magic.power}ダメージ"
                             );
                         }
                     }
@@ -43,7 +43,7 @@ public class MagicCommand : IBattleCommand
                     resolvedTarget.TakeDamage(magic.power);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
-                        $"{resolvedTarget.GetUnitName()}に{magic.power}ダメージ！"
+                        $"{resolvedTarget.GetBattleDisplayName()}に{magic.power}ダメージ！"
                     );
                 }
                 break;

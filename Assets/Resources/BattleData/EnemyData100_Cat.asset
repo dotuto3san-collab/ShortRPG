@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5af69a94cba734ebe597dcdb849272, type: 3}
+  m_Name: EnemyData100_Cat
+  m_EditorClassIdentifier: 
+  unitName: "\u732B"
+  MaxHP: 1000
+  attack: 10
+  defense: 0
+  sprite: {fileID: 1366099730, guid: 50265d5d34da4ac409f62d1923755805, type: 3}
+  expReward: 10
+  actionRotation:
+  - {fileID: 11400000, guid: 61525d93a74be1348a53ae9c689e4457, type: 2}
+  - {fileID: 11400000, guid: 4c7a76299586b534a979743aa8faed6e, type: 2}
+  idleCance: 0.1
+  randomIdleText: "\u5BDD\u3053\u308D\u3093\u3060\uFF01"

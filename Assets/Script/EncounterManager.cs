@@ -37,6 +37,9 @@ public class EncounterManager : MonoBehaviour
         string areaID =
             EncounterAreaManager.Instance.GetCurrentArea(playerPosition);
 
+        Debug.Log($"[Encounter] areaID = '{areaID}', currentSteps = {currentSteps}, nextEncounterStep = {nextEncounterStep}");
+
+
         if (string.IsNullOrEmpty(areaID))
         {
             ResetEncounterCount();

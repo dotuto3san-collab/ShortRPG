@@ -12,6 +12,9 @@ public class TreasureChest : MonoBehaviour
     [SerializeField] private ItemData itemData;
     [SerializeField] private int itemAmount = 1;
 
+    [Header("ストーリー連携")]
+    [SerializeField] private string openedFlagName;
+
     private SpriteRenderer spriteRenderer;
 
     private bool isOpened;
@@ -102,6 +105,19 @@ public class TreasureChest : MonoBehaviour
 
         isOpened = true;
         isOpening = false;
+
+        if (!string.IsNullOrEmpty(openedFlagName))
+        {
+            if(StoryStateManager.Instance != null)
+            {
+                StoryStateManager.Instance.SetFlag(openedFlagName);
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"TreasureChest: StoryStateManager.Instanceが存在しません。 Flag = {openedFlagName}");
+            }
+        }
 
         yield return MessageUI.Instance.ShowMessage(
             $"{itemData.itemName}を{itemAmount}個手に入れた",

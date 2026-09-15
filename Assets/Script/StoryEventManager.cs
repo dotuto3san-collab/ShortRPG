@@ -6,92 +6,49 @@ public class StoryEventManager : MonoBehaviour
 {
     public static StoryEventManager Instance { get; private set; }
 
-    [System.Serializable] public class StoryEventEntry
-    {
-        [Header("このフラグがONになったら実行")]
-        public string flagName;
-
-        [Header("実行するイベント")]
-        public UnityEvent storyEvent;
-    }
-
-    [Header("ストーリーイベント")]
-    [SerializeField] private List<StoryEventEntry> eventEntries =
-        new List<StoryEventEntry>();
-
-    private Dictionary<string, UnityEngine.Events.UnityEvent> events =
-        new Dictionary<string, UnityEngine.Events.UnityEvent>();
+    private Dictionary<string, UnityEvent> events
+        = new Dictionary<string, UnityEvent>();
 
     void Awake()
     {
-        if(Instance != null && Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
-
-        DontDestroyOnLoad(gameObject);
-
-        RegisterEvents();
     }
 
-    public void RegisterEvents()
+    public void RegisterEvent(string flagName, UnityEvent storyEvent)
     {
-        events.Clear();
+        if (string.IsNullOrEmpty(flagName) || storyEvent == null) return;
 
-        foreach (StoryEventEntry entry in eventEntries)
+        if (events.ContainsKey(flagName))
         {
-            if(entry == null)
-            {
-                continue;
-            }
-
-            if (string.IsNullOrEmpty(entry.flagName))
-            {
-                Debug.LogWarning(
-                    "StoryEventManager: flagNameが設定されていないイベントがあります。");
-                continue;
-            }
-
-            if (entry.storyEvent == null)
-            {
-                Debug.LogWarning(
-                    $"StoryEventManager: UnityEventが設定されていません。 Flag = {entry.flagName}");
-                continue;
-            }
-
-            if (events.ContainsKey(entry.flagName))
-            {
-                Debug.LogWarning(
-                    $"StoryEventManager: 同じflagNameが重複しています。Flag = {entry.flagName}");
-                continue;
-            }
-
-            events.Add(entry.flagName, entry.storyEvent);
+            Debug.LogWarning($"StoryEventManager: 同じflagNameが既に登録されています。上書きします Flag = {flagName}");
         }
+
+        events[flagName] = storyEvent;
+    }
+
+    public void UnregisterEvent(string flagName)
+    {
+        if (string.IsNullOrEmpty(flagName)) return;
+        events.Remove(flagName);
     }
 
     public void ExecuteEvent(string flagName)
     {
-        if (string.IsNullOrEmpty(flagName))
-        {
-            return;
-        }
+        if (string.IsNullOrEmpty(flagName)) return;
 
-        if(!events.TryGetValue(
-            flagName,
-            out UnityEvent storyEvent))
+        if (!events.TryGetValue(flagName, out UnityEvent storyEvent))
         {
-            Debug.Log(
-                $"StoryEventManager: イベント未登録 = {flagName}");
+            Debug.Log($"StoryEventManager: イベント未登録 = {flagName}");
             return;
         }
 
         storyEvent.Invoke();
-
-        Debug.Log(
-            $"Story Event Execute: {flagName}");
+        Debug.Log($"Story Event Execute: {flagName}");
     }
 }

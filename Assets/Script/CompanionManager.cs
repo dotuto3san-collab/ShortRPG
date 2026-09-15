@@ -23,8 +23,6 @@ public class CompanionManager : MonoBehaviour
         }
 
         Instance = this;
-
-        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()

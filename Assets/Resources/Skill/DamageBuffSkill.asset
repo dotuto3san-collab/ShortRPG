@@ -14,5 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: "\u5F37\u5316"
   type: 3
+  icon: {fileID: -1097866640, guid: 9301f3ef4d6bdcf4b801be5708e0562b, type: 3}
   power: 50
+  attackDebuffRate: 0
+  defenseDebuffRate: 0
+  effectText: 
+  descriptionText: 
   slotType: 2

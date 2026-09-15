@@ -78,7 +78,7 @@ public class SkillCommand : IBattleCommand
                     enemy.TakeDamage(amount);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
-                        $"{enemy.GetUnitName()}に{amount}ダメージ！"
+                        $"{enemy.GetBattleDisplayName()}に{amount}ダメージ！"
                     );
                 }
 
@@ -105,7 +105,7 @@ public class SkillCommand : IBattleCommand
                     enemy.TakeDamage(damage);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
-                        $"{enemy.GetUnitName()}に{damage}ダメージ！"
+                        $"{enemy.GetBattleDisplayName()}に{damage}ダメージ！"
                     );
 
                     if (enemy.IsDead())
@@ -115,7 +115,7 @@ public class SkillCommand : IBattleCommand
                     enemy.ApplyDefenseDebuff(defenseDebuffRate);
 
                     yield return BattleLogUI.Instance.ShowLogAndWait(
-                        $"{enemy.GetUnitName()}の攻撃力が{skill.attackDebuffRate}%、\n" +
+                        $"{enemy.GetBattleDisplayName()}の攻撃力が{skill.attackDebuffRate}%、\n" +
                         $"防御力が{skill.defenseDebuffRate}%減少した。");
                 }
 

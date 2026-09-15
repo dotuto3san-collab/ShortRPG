@@ -8,6 +8,8 @@ public class SkillButtonUI : MonoBehaviour,ISelectHandler
     private SkillData skill;
     private SkillUI parent;
 
+    [SerializeField] private Image iconImage;
+
     public SkillData Skill => skill;
 
     public void Setup(
@@ -20,6 +22,12 @@ public class SkillButtonUI : MonoBehaviour,ISelectHandler
         if(skill == null)
         {
             return;
+        }
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = skill.icon;
+            iconImage.enabled = skill.icon != null;
         }
 
         Button button = GetComponent<Button>();

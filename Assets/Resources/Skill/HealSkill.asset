@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: "\u56DE\u5FA9"
   type: 1
+  icon: {fileID: -417781169, guid: 9301f3ef4d6bdcf4b801be5708e0562b, type: 3}
   power: 50
+  attackDebuffRate: 0
+  defenseDebuffRate: 0
   effectText: "HP\u309250\u56DE\u5FA9\u3059\u308B"
   descriptionText: "\u5F7C\u5973\u306E\u6301\u3061\u5473\u3067\u3042\u308B\u56DE\u5FA9\u6280\u3002\u65E5\u5E38\u3067\u3088\u304F\u3042\u308B\u50B7\u7A0B\u5EA6\u306A\u3089\u4F55\u3067\u3082\u6CBB\u305B\u308B\u3068\u3044\u3046\u3002"
   slotType: 0

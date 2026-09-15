@@ -11,4 +11,14 @@ public class BattleData : ScriptableObject
 
     [Header("ŒoŒ±’l")]
     public int expReward = 10;
+
+    [Header("“GAI")]
+    public EnemyActionData[] actionRotation;
+
+    [Header("Šm—¦‚³‚Ú‚è")]
+    [Range(0f, 1f)]
+    public float idleCance = 0.10f;
+
+    [TextArea]
+    public string randomIdleText;
 }

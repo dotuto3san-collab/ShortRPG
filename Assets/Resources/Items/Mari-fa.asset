@@ -12,12 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98afdb9f048f15546973f3b5a69ce6b6, type: 3}
   m_Name: Mari-fa
   m_EditorClassIdentifier: 
-  itemId: 015
+  itemId: 999
   itemName: "\u30DE\u30EA\u30FC\u30D5\u30A1"
+  effectText: 
   description: "\u3076\u3063\u30C8\u3079\u308B\u3001\u8607\u751F\u52B9\u679C"
   icon: {fileID: 0}
   buyPrice: 8000
   sellPrice: 0
   canSell: 1
-  type: 0
+  canUseInBattle: 0
+  canUseInField: 0
+  useEffect: {fileID: 0}
+  equipData:
+    attackPower: 0
+    defensePower: 0
+    chargePower: 0
+    equipType: 0
   rarity: 4

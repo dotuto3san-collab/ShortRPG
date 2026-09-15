@@ -18,3 +18,7 @@ MonoBehaviour:
   defense: 5
   sprite: {fileID: 3874357053985992593, guid: 683f6898e14b97b4db0892ab40a2b3cc, type: 3}
   expReward: 10
+  actionRotation:
+  - {fileID: 0}
+  idleCance: 0.1
+  randomIdleText: 

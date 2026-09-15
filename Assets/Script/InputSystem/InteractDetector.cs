@@ -40,21 +40,48 @@ public class InteractDetector : MonoBehaviour
         // もしNPCがいるなら
         if(npc != null)
         {
+            if (!npc.CanStart())
+            {
+                return;
+            }
             // 親ObjectのPlayerの位置座標を渡して、NPC側で計算してもらう
             npc.LookAtPlayer(transform.root.position);
             // NPCからjsonファイルを取得
             TextAsset json = npc.GetStoryJson();
-            // jsonファイルが見つかったら
-            if(json != null)
+            if(json == null)
             {
-                Debug.Log(npc.GetNPCName() + "会話を開始します");
-                // SetShopNPC関数にShopNPCスクリプトを渡す
-                InkManager.Instance.SetShopNPC(npc.GetComponent<ShopNPC>());
-                //InkManagerに会話を始めさせる
-                InkManager.Instance.StartStory(json);
+                return;
+            }
+            
+            Debug.Log(npc.GetNPCName() + "会話を開始します");
 
-                // GameManagerで会話モードに変更
-                GameManager.Instance.ChangeState(npc.GetInteractionState());
+            // SetShopNPC関数にShopNPCスクリプトを渡す
+            InkManager.Instance.SetShopNPC(npc.GetComponent<ShopNPC>());
+
+            npc.MarkTriggered();
+
+            if(player != null)
+            {
+                player.isInputLocked = true;
+            }
+
+            GameManager.Instance.ChangeState(npc.GetInteractionState());
+
+            if(npc.UseFadeOnEventStart && npc.GetInteractionState() == GameState.Event && SceneTransitionManager.Instance != null)
+            {
+                SceneTransitionManager.Instance.RequestEventFade(() =>
+                {
+                    if (npc.CameraFocusTarget != null)
+                    {
+                        SceneTransitionManager.Instance.FocusCameraOn(npc.CameraFocusTarget);
+                    }
+
+                    InkManager.Instance.StartStory(json);
+                });
+            }
+            else
+            {
+                InkManager.Instance.StartStory(json);
             }
 
             return;

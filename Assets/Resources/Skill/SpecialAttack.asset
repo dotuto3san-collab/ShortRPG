@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec1805793aa6a044092722504f535489, type: 3}
   m_Name: SpecialAttack
   m_EditorClassIdentifier: 
-  skillName: "\u653B\u6483"
+  skillName: "\u30B9\u30E9\u30C3\u30B7\u30E5"
   type: 0
+  icon: {fileID: -808979163, guid: 9301f3ef4d6bdcf4b801be5708e0562b, type: 3}
   power: 100
+  attackDebuffRate: 0
+  defenseDebuffRate: 0
   effectText: "\u5168\u4F53\u306B100\u30C0\u30E1\u30FC\u30B8"
   descriptionText: "\u4E3B\u4EBA\u516C\u306E\u30B9\u30AD\u30EB\u3002\u6C34\u5E73\u306B\u3076\u3063\u305F\u5207\u308B\u3053\u306E\u6280\u306F\u30B9\u30A4\u30AB\u5272\u308A\u3067\u306F\u3084\u3084\u4E0D\u5411\u304D\u3060\u308D\u3046"
   slotType: 4

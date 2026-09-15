@@ -7,6 +7,11 @@ public class StoryStateManager : MonoBehaviour
 
     private HashSet<string> flags = new HashSet<string>();
 
+    public List<string> GetAllFlags()
+    {
+        return new List<string>(flags);
+    }
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -16,8 +21,6 @@ public class StoryStateManager : MonoBehaviour
         }
 
         Instance = this;
-
-        DontDestroyOnLoad(gameObject);
     }
 
     public void SetFlag(string flagName)
@@ -64,5 +67,22 @@ public class StoryStateManager : MonoBehaviour
         flags.Remove(flagName);
 
         Debug.Log($"Story Flag OFF: {flagName}");
+    }
+
+    public void LoadFlags(List<string> flagList)
+    {
+        flags.Clear();
+
+        if (flagList == null) return;
+
+        foreach(var flagName in flagList)
+        {
+            if (!string.IsNullOrEmpty(flagName))
+            {
+                flags.Add(flagName);
+            }
+        }
+
+        Debug.Log($"StoryStateManager: フラグを{flags.Count}件ロードしました");
     }
 }

@@ -8,8 +8,21 @@ public class DialogueTrigger : MonoBehaviour
     [Header("このNPCが話すInkファイル(JSON)")]
     [SerializeField] private TextAsset inkJsonAsset;
 
+    [Header("発生条件")]
+    [SerializeField] private bool oneShot = false;
+    [SerializeField] private string requiredFlag;
+
+    [Header("永続化設定")]
+    [SerializeField] private string persistOnceFlag;
+
+    [Header("演出設定")]
+    [SerializeField] private bool useFadeOnEventStart = true;
+    [SerializeField] private Transform cameraFocusTarget;
+
     // Animatorを扱うための変数
     private Animator anim;
+
+    private bool hasTriggered;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -17,10 +30,48 @@ public class DialogueTrigger : MonoBehaviour
         // ObjectからAnimatorを確保
         anim = GetComponent<Animator>();   
     }
+
     public GameState GetInteractionState()
     {
         // Inspectorで実際に指定したゲーム状態を返す
         return interactionState;
+    }
+
+    public bool UseFadeOnEventStart => useFadeOnEventStart;
+    public Transform CameraFocusTarget => cameraFocusTarget;
+
+    public bool CanStart()
+    {
+        if (hasTriggered && oneShot) return false;
+
+        if(oneShot && !string.IsNullOrEmpty(persistOnceFlag))
+        {
+            if(StoryStateManager.Instance != null && StoryStateManager.Instance.HasFlag(persistOnceFlag))
+            {
+                hasTriggered = true;
+                return false;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(requiredFlag))
+        {
+            if(StoryStateManager.Instance == null || !StoryStateManager.Instance.HasFlag(requiredFlag))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void MarkTriggered()
+    {
+        hasTriggered = true;
+
+        if(oneShot && !string.IsNullOrEmpty(persistOnceFlag) && StoryStateManager.Instance != null)
+        {
+            StoryStateManager.Instance.SetFlag(persistOnceFlag);
+        }
     }
 
     // プレイヤーの位置を確認して、プレイヤーの方向へ向く

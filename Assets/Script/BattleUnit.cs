@@ -17,6 +17,8 @@ public class BattleUnit : MonoBehaviour
 
     [HideInInspector] public bool hasGivenExp = false;
 
+    private int enemyActionIndex = 0;
+
     public int GetHP()
     {
         return currentHP;
@@ -42,6 +44,21 @@ public class BattleUnit : MonoBehaviour
         return data.unitName;
     }
 
+    public string GetBattleDisplayName()
+    {
+        if (isPlayer)
+        {
+            return GetUnitName();
+        }
+
+        if(BattleManager.Instance != null)
+        {
+            return BattleManager.Instance.GetEnemyDisplayName(this);
+        }
+
+        return GetUnitName();
+    }
+
     public void Init()
     {
         attackBuff = 0;
@@ -50,6 +67,8 @@ public class BattleUnit : MonoBehaviour
 
         awakenTurn = 0;
         hasGivenExp = false;
+
+        enemyActionIndex = 0;
 
         if(data == null)
         {
@@ -194,6 +213,27 @@ public class BattleUnit : MonoBehaviour
     public void Attack(BattleUnit target)
     {
         target.TakeDamage(GetAttack());
+    }
+
+    public EnemyActionData GetNextEnemyAction()
+    {
+        if(data.actionRotation == null ||
+           data.actionRotation.Length == 0)
+        {
+            return null;
+        }
+
+        EnemyActionData action =
+            data.actionRotation[enemyActionIndex];
+
+        enemyActionIndex++;
+
+        if(enemyActionIndex >= data.actionRotation.Length)
+        {
+            enemyActionIndex = 0;
+        }
+
+        return action;
     }
 
     public bool IsDead()

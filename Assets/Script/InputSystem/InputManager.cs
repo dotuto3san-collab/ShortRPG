@@ -24,8 +24,6 @@ public class InputManager : MonoBehaviour
         {
             // このInputManagerをインスタンスとして確立
             Instance = this;
-            // シーンを切り替えてもこのInputManagerを保持する
-            DontDestroyOnLoad(gameObject);
         }
         // 既にインスタンスが存在する場合
         else
@@ -276,6 +274,7 @@ public class InputManager : MonoBehaviour
 
             // 会話状態のとき
             case GameState.Dialogue:
+            case GameState.Event:
                 // InkManagerのInstanceがない場合はエラーログを出す
                 if (InkManager.Instance == null) Debug.LogError("InkManagerのInstanceがありません！");
                 // InkManagerのSubmit関数を呼び出す
@@ -326,6 +325,7 @@ public class InputManager : MonoBehaviour
 
             // ゲーム状態が会話中の場合
             case GameState.Dialogue:
+            case GameState.Event:
                 // InkManagerが存在するなら、Ink機能の決定機能を実行する
                 if (InkManager.Instance != null) InkManager.Instance.OnSubmit();
                 break;

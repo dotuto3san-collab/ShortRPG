@@ -18,6 +18,9 @@ public class SkillData : ScriptableObject
     
     public SkillType type;
 
+    [Header("•\Ž¦")]
+    public Sprite icon;
+
     [Header("Œø‰Ê")]
     public int power;
 

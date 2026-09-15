@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
@@ -166,8 +165,12 @@ public class BattleManager : MonoBehaviour
 
     private IEnumerator BattleLoop()
     {
-        string enemyNames = string.Join("、 ", enemies.ConvertAll(e => e.data.unitName));
-        yield return BattleLogUI.Instance.ShowLogAndWait($"{enemyNames}が現れた！");
+        string enemyNames = string.Join(
+            "、 ",
+            enemies.ConvertAll(e => e.GetBattleDisplayName()));
+
+        yield return BattleLogUI.Instance.ShowLogAndWait(
+            $"{enemyNames}が現れた！");
 
         canInterruptNow = true;
         yield return TryProcessInterrupt(player);
@@ -471,25 +474,14 @@ public class BattleManager : MonoBehaviour
 
             foreach (var enemy in enemies)
             {
-                if (enemy.IsDead()) continue;
+                if (enemy == null || enemy.IsDead())
+                {
+                    continue;
+                }
 
                 canInterruptNow = false;
 
-                yield return BattleLogUI.Instance.ShowLogAndWait($"{enemy.data.unitName}の攻撃！");
-
-                int baseDamage = enemy.GetAttack();
-                int damage = Random.Range(baseDamage - 8, baseDamage + 16 + 1);
-
-                if (damage < 1)
-                {
-                    damage = 1;
-                }
-
-                player.TakeDamage(damage);
-
-                yield return BattleLogUI.Instance.ShowLogAndWait(
-                    $"{player.GetUnitName()}は{damage}のダメージを受けた！"
-                );
+                yield return ExecuteEnemyAction(enemy);
 
                 canInterruptNow = true;
 
@@ -502,40 +494,9 @@ public class BattleManager : MonoBehaviour
                     yield break;
                 }
 
-                if (enemies.TrueForAll(e => e.IsDead()))
+                if (AreAllEnemiesDead())
                 {
-                    int interruptExpGained = 0;
-
-                    foreach (var deadEnemy in enemies)
-                    {
-                        if (deadEnemy.IsDead() && !deadEnemy.hasGivenExp)
-                        {
-                            deadEnemy.hasGivenExp = true;
-                            interruptExpGained += deadEnemy.data.expReward;
-                        }
-                    }
-
-                    if (interruptExpGained > 0)
-                    {
-                        int prevLevel = PlayerStatus.Instance.GetLevel();
-                        int levelUpCount = PlayerStatus.Instance.AddExperience(interruptExpGained);
-                        int newLevel = PlayerStatus.Instance.GetLevel();
-
-                        yield return BattleLogUI.Instance.ShowLogAndWait(
-                            $"敵を全て倒した！\n経験値を{interruptExpGained}獲得した",
-                            true
-                        );
-
-                        if (levelUpCount > 0)
-                        {
-                            yield return BattleLogUI.Instance.ShowLogAndWait(
-                                $"{player.GetUnitName()}はレベルアップした！\nLv.{prevLevel} → {newLevel}",
-                                true
-                            );
-                        }
-                    }
-
-                    EndBattleRoutine();
+                    yield return ResolveEnemyDefeat();
                     yield break;
                 }
             }
@@ -616,6 +577,51 @@ public class BattleManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    public string GetEnemyDisplayName(BattleUnit enemy)
+    {
+        if(enemy == null)
+        {
+            return "";
+        }
+
+        if (enemy.isPlayer)
+        {
+            return enemy.GetUnitName();
+        }
+
+        string baseName = enemy.data.unitName;
+
+        int sameEnemyCount = 0;
+        int sameEnemyIndex = 0;
+
+        foreach(var currentEnemy in enemies)
+        {
+            if(currentEnemy == null || currentEnemy.isPlayer)
+            {
+                continue;
+            }
+
+            if(currentEnemy.data == enemy.data)
+            {
+                sameEnemyCount++;
+
+                if(currentEnemy == enemy)
+                {
+                    sameEnemyIndex = sameEnemyCount;
+                }
+            }
+        }
+
+        if(sameEnemyCount <= 1)
+        {
+            return baseName;
+        }
+
+        char suffix = (char)('A' + sameEnemyIndex - 1);
+
+        return $"{baseName}{suffix}";
     }
 
     public void EnqueueReservedAction(
@@ -804,6 +810,174 @@ public class BattleManager : MonoBehaviour
     public bool AreAllEnemiesDead()
     {
         return enemies.TrueForAll(e => e == null || e.IsDead());
+    }
+
+    private IEnumerator ExecuteEnemyAction(BattleUnit enemy)
+    {
+        EnemyActionData action = enemy.GetNextEnemyAction();
+
+        if(action == null)
+        {
+            Debug.LogWarning(
+                $"{enemy.GetBattleDisplayName()}に敵行動が設定されていません"
+            );
+
+            yield break;
+        }
+
+        if(action is EnemyIdleData idleData)
+        {
+            yield return ExecuteEnemyIdle(
+                enemy,
+                idleData.idleText);
+
+            yield break;
+        }
+
+        if(enemy.data.idleCance > 0f &&
+           Random.value < enemy.data.idleCance)
+        {
+            yield return ExecuteEnemyRandomIdle(enemy);
+            yield break;
+        }
+
+        if(action is EnemyAttackData attackData)
+        {
+            yield return ExecuteEnemyAttack(enemy, attackData);
+            yield break;
+        }
+
+        Debug.LogWarning(
+            $"未対応の敵行動: {action.GetType().Name}"
+        );
+    }
+
+    private IEnumerator ExecuteEnemyRandomIdle(BattleUnit enemy)
+    {
+        string idleText = enemy.data.randomIdleText;
+
+        if (string.IsNullOrEmpty(idleText))
+        {
+            Debug.LogWarning(
+                $"{enemy.GetBattleDisplayName()}の確率さぼりテキストが表示されません"
+            );
+
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                $"{enemy.GetBattleDisplayName()}はさぼっている!"
+            );
+        }
+
+        else
+        {
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                $"{enemy.GetBattleDisplayName()}は{idleText}"
+            );
+        }
+
+        yield return new WaitForSeconds(0.8f);
+    }
+
+    private IEnumerator ExecuteEnemyIdle(
+        BattleUnit enemy,
+        string idleText)
+    {
+        if (string.IsNullOrEmpty(idleText))
+        {
+            Debug.LogWarning(
+                $"{enemy.GetBattleDisplayName()}の確定さぼりテキストが設定されていません。"
+            );
+
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                $"{enemy.GetBattleDisplayName()}はさぼっている！"
+            );
+        }
+        else
+        {
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                $"{enemy.GetBattleDisplayName()}は{idleText}"
+            );
+        }
+
+        yield return new WaitForSeconds(0.5f);
+    }
+
+    private IEnumerator ExecuteEnemyAttack(
+        BattleUnit enemy,
+        EnemyAttackData action)
+    {
+        yield return BattleLogUI.Instance.ShowLogAndWait(
+            $"{enemy.GetBattleDisplayName()}の{action.actionName}"
+        );
+
+        yield return new WaitForSeconds(0.3f);
+
+        int baseDamage =
+            enemy.GetAttack() + action.damage;
+
+        int damage = Random.Range(
+            baseDamage + action.minRandomDamage,
+            baseDamage + action.maxRandomDamage
+        );
+
+        if(damage < 1)
+        {
+            damage = 1;
+        }
+
+        player.TakeDamage(damage);
+
+        yield return BattleLogUI.Instance.ShowLogAndWait(
+            $"{player.GetUnitName()}は{damage}のダメージを受けた！"
+        );
+    }
+
+    private IEnumerator ResolveEnemyDefeat()
+    {
+        int expGained = 0;
+
+        foreach(var enemy in enemies)
+        {
+            if(enemy != null &&
+               enemy.IsDead() &&
+               !enemy.hasGivenExp)
+            {
+                enemy.hasGivenExp = true;
+                expGained += enemy.data.expReward;
+            }
+        }
+
+        if (expGained > 0)
+        {
+            int prevLevel = PlayerStatus.Instance.GetLevel();
+
+            int levelUpCount =
+                PlayerStatus.Instance.AddExperience(expGained);
+
+            int newLevel = PlayerStatus.Instance.GetLevel();
+
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                $"敵を全て倒した！\n経験値を{expGained}獲得した",
+                true
+            );
+
+            if (levelUpCount > 0)
+            {
+                yield return BattleLogUI.Instance.ShowLogAndWait(
+                    $"{player.GetUnitName()}はレベルアップした！\n" +
+                    $"Lv.{prevLevel} → {newLevel}",
+                    true
+                );
+            }
+        }
+        else
+        {
+            yield return BattleLogUI.Instance.ShowLogAndWait(
+                "敵を全て倒した！",
+                true
+            );
+        }
+
+        EndBattleRoutine();
     }
 
     private void EndBattleRoutine()

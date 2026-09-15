@@ -18,7 +18,7 @@ public class DamageEffect : ItemEffect
                 enemy.TakeDamage(damage);
 
                 yield return BattleLogUI.Instance.ShowLogAndWait(
-                    $"{enemy.data.unitName}に{damage}ダメージ与えた！"
+                    $"{enemy.GetBattleDisplayName()}に{damage}ダメージ与えた！"
                 );
             }
         }
@@ -33,7 +33,7 @@ public class DamageEffect : ItemEffect
             target.TakeDamage(damage);
 
             yield return BattleLogUI.Instance.ShowLogAndWait(
-                $"{target.data.unitName}に{damage}ダメージ与えた！"
+                $"{target.GetBattleDisplayName()}に{damage}ダメージ与えた！"
             );
         }
     }
